@@ -80,7 +80,7 @@ router.post("/user/login", async(req, res)=>{
 router.post("/user/logout", (req, res)=>{
 
     try {
-        res.cookie("token","", {expires : new Date()}).json({message : "Logout Success", success : true})
+        res.cookie("token","", {expires : new Date()}).json({message : "User Logout Success", success : true})
     } catch (error) {
         console.log("some error in logging out", error);
         res.status(500).send("error " + error.message);
