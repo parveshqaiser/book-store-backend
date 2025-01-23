@@ -21,6 +21,11 @@ const orderModel = new mongoose.Schema({
         type : Number,
         required : true,
     },
+    orderStatus: {
+        type : String,
+        enum : ["Pending", "Delivered"],
+        default : "Pending",
+    },
     address : {
         doorNo : {
             type : String,
