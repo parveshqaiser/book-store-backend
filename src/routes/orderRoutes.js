@@ -103,6 +103,32 @@ router.get("/received/orders/user", authentication, async(req, res)=>{
      }
 });
 
+router.post("/update/order/status/:id", authentication, async(req, res)=>{
+
+     try {
+          let {orderStatus} = req.body;
+          let orderId = req.params.id;
+
+          if(!["Delivered"].includes(orderStatus))
+          {
+               return res.status(400).json({message : "Invalid Status", success : false});
+          }
+
+          let orderDetails = await OrderSchema.findById({_id:orderId, orderStatus:"Pending"});
+          if(!orderDetails){
+               return res.status(400).json({message : "Order Details Doesn't Exist", success : false});
+          }
+
+          orderDetails.orderStatus= orderStatus;
+          await orderDetails.save();
+
+          res.status(200).json({message : "Order Status Changed to Delivered", success:true, orderDetails})
+     } catch (error) {
+          console.log("error in updating order status", error);
+          res.status(500).json({ message: "error in updating order status" });
+     }
+})
+
 
 router.get("/getTotalSales",authentication, async(req, res)=>{
 

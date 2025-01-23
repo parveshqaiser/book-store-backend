@@ -16,7 +16,8 @@ const authentication = (req, res,next)=>{
         req.id = verifyToken.id;
         next();
     } catch (error) {
-        console.log("error in authentication")
+        console.log("error in authentication");
+        res.status(500).json({message : "error in authentication", success: false});
     }
 };
 
