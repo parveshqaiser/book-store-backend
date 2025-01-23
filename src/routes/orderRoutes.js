@@ -45,7 +45,7 @@ router.post("/order/book/", authentication,async(req,res)=>{
                     state : address.state,
                     pinCode : address.pinCode,
                },
-               product  : products
+               product :products
           });
 
           // console.log("placeOrder ", placeOrder);
@@ -54,7 +54,7 @@ router.post("/order/book/", authentication,async(req,res)=>{
                return res.status(400).json({message : "Failed To place Order", success : true});
           }
 
-          res.status(200).json({message : "Order Placed Successfully", success : false});
+          res.status(200).json({message : "Order Placed Successfully", success : true});
                
      } catch (error) {
           console.log("some error in ordering book", error);
