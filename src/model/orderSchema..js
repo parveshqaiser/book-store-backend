@@ -17,10 +17,6 @@ const orderModel = new mongoose.Schema({
         type : Number,
         required : true
     },
-    price : {
-        type : Number,
-        required : true
-    },
     totalPrice : {
         type : Number,
         required : true,
@@ -43,9 +39,19 @@ const orderModel = new mongoose.Schema({
             required : true,
         }
     },
-    productId : [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref : "books"
+    product : [{
+        productId : {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "books",
+        },
+        quantity : {
+            type : Number,
+            required : true
+        },
+        price : {
+            type : Number,
+            required : true,
+        }
     }]
 },{timestamps : true});
 
