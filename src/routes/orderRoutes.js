@@ -1,6 +1,6 @@
 
 
-import express, { query } from "express";
+import express from "express";
 import authentication from "../middleware/auth.js";
 import BookSchema from "../model/bookSchema.js";
 import OrderSchema from "../model/orderSchema..js";
@@ -61,7 +61,6 @@ router.post("/order/book/", authentication,async(req,res)=>{
           res.status(500).json({ message: "Failed to create order" });
      }
 });
-
 
 router.get("/received/orders/user", authentication, async(req, res)=>{
 
@@ -128,7 +127,6 @@ router.post("/update/order/status/:id", authentication, async(req, res)=>{
           res.status(500).json({ message: "error in updating order status" });
      }
 })
-
 
 router.get("/getTotalSales",authentication, async(req, res)=>{
 
