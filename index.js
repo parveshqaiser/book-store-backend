@@ -6,6 +6,7 @@ import bookRoutes from "./src/routes/bookRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
+import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 
 import cookieParser from "cookie-parser";
 
@@ -15,7 +16,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-    origin :"",
+    origin : "http://localhost:5173",
     credentials : true,
 }));
 
@@ -23,6 +24,7 @@ app.use("/", bookRoutes);
 app.use("/", userRoutes);
 app.use("/", adminRoutes);
 app.use("/", orderRoutes);
+app.use("/", dashboardRoutes);
 
 app.get("/", (req, res)=>{
     res.status(200).json({message : "Hello from book store"})

@@ -65,26 +65,26 @@ router.post("/order/book/", authentication,async(req,res)=>{
 router.get("/received/orders/user", authentication, async(req, res)=>{
 
      try {
+          
           let query = [
                {
-                 $match: {
-                   orderStatus: "Pending",
-                 }
+                    $match: {
+                         orderStatus: "Pending",
+                    }
                },
                {
-                 $lookup: {
-                   from: "books",
-                   localField: "product.productId",
-                   foreignField: "_id",
-                   as : "bookDetails",
-                   pipeline :[{
-                     $project : {
-                        title: 1,
-                        author: 1,
-                         "_id": 0
-                     }
-                   }],
-                 }
+                    $lookup: {
+                         from: "books",
+                         localField: "product.productId",
+                         foreignField: "_id",
+                         as : "bookDetails",
+                         pipeline :[{
+                              $project : {
+                                   title: 1,
+                                   author: 1,
+                                   "_id": 0
+                              }}],
+                         }
                },
           ];
 
@@ -126,41 +126,6 @@ router.post("/update/order/status/:id", authentication, async(req, res)=>{
           console.log("error in updating order status", error);
           res.status(500).json({ message: "error in updating order status" });
      }
-})
-
-router.get("/getTotalSales",authentication, async(req, res)=>{
-
-     try {
-          let query =[
-               {
-                 $group: {
-                    _id: null,
-                    totalSales : {
-                         $sum:"$totalPrice",
-                    },
-                    totalQuantity : {
-                         $sum : "$orderedQuantity"
-                    }
-                    }
-               },
-               {
-                $project: {
-                    _id:0,
-                    totalSales:1,
-                    totalQuantity:1
-               }
-               }];
-
-               let getDetails = await OrderSchema.aggregate(query);
-
-               console.log("getDetails ", getDetails);
-               res.status(200).json({getDetails});
-
-     } catch (error) {
-          console.log("some error in getting total sales details", error);
-          res.status(500).json({ message: "some error in getting sales details" });
-     }
-})
-
+});
 
 export default router;
