@@ -118,6 +118,51 @@ router.get("/sales/category/wise", authentication, async(req, res)=>{
         console.log("some error in getting all category wise book sales", error);
         res.status(500).json({ message: "some error in getting all category wise book sales"});
     }
+});
+
+router.get("/revenue/monthly/wise", authentication, async(req, res)=>{
+
+    try {
+        let query = [
+        {
+            $match: {
+                createdAt : {
+                    $gte : new Date("2025-04-01"),$lt: new Date( "2025-12-31")
+                }
+            }
+        },
+        {
+            $group: {
+            _id: {
+                year: { 
+                    $year: "$createdAt"
+                },
+                month: { 
+                    $month: "$createdAt"
+                } 
+            },
+                totalSales: { $sum: "$totalPrice" },
+                totalOrders: { $sum: 1 }
+            }
+        },
+        {
+            $project: {
+                _id : 0,
+                yearDetails : "$_id",
+                totalSales :1,
+                totalOrders :1      
+            }
+        }];
+
+
+        let monthlySales = await OrderSchema.aggregate(query);
+
+        res.status(200).json({data : monthlySales || []})
+
+    } catch (error) {
+        console.log("some error in getting monthly sales", error);
+        res.status(500).json({ message: "some error in getting monthly sales"});
+    }
 })
 
 export default router;
