@@ -7,6 +7,7 @@ import OrderSchema from "../model/orderSchema..js";
 
 const router = express.Router();
 
+// for user
 router.post("/order/book/", authentication,async(req,res)=>{
 
      try {
@@ -92,7 +93,7 @@ router.get("/received/orders/user", authentication, async(req, res)=>{
 
           if(userOrders.length ==0)
           {
-               return res.status(200).json({message : "No New Orders Found", success:false});
+               return res.status(200).json({message : "No New Orders Found", success:false , data : []});
           }
 
           res.status(200).json({message : "Order Details Fetched", userOrders, success : true});

@@ -32,6 +32,39 @@ router.get("/getTotalBooks", authentication, async(req, res)=>{
     }
 });
 
+router.get("/getTotalQuantitySold", authentication, async(req, res)=>{
+
+    try {
+        let query = [
+        {
+            $match: {
+            orderStatus : "Delivered"
+            }
+        },
+        {
+            $group: {
+            _id: null,
+            totalQtySold : {
+                $sum : "$orderedQuantity"
+            }      
+            }
+        },
+        {
+            $project: {
+            _id : 0,
+            totalQtySold :1
+            }
+        }];
+
+        let totalQtySold = await OrderSchema.aggregate(query);
+
+        res.status(200).json({data : totalQtySold || []})
+    } catch (error) {
+        console.log("some error in total sold qty", error);
+        res.status(500).json({ message: "some error in getting total sold qty"});
+    }
+});
+
 router.get("/getTotalSales",authentication, async(req, res)=>{
 
     try {
@@ -127,7 +160,7 @@ router.get("/revenue/monthly/wise", authentication, async(req, res)=>{
         {
             $match: {
                 createdAt : {
-                    $gte : new Date("2025-04-01"),$lt: new Date( "2025-12-31")
+                    $gte : new Date("2025-01-01"),$lt: new Date( "2025-12-31")
                 }
             }
         },
@@ -163,6 +196,7 @@ router.get("/revenue/monthly/wise", authentication, async(req, res)=>{
         console.log("some error in getting monthly sales", error);
         res.status(500).json({ message: "some error in getting monthly sales"});
     }
-})
+});
+
 
 export default router;

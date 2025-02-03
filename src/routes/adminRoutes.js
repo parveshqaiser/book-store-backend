@@ -9,8 +9,6 @@ router.post("/admin/login", async(req, res)=>{
     try {
         let {username, password} = req.body;
 
-        // console.log("req.body ", username, password);
-
         if(!username || username.trim() == ""){
             res.status(400).json({message: "Admin Username Required"});
             return;
@@ -22,8 +20,6 @@ router.post("/admin/login", async(req, res)=>{
         }
 
         let admin = await AdminSchema.findOne({username : username});
-
-        // console.log("admin   **************** ", admin);
 
         if(!admin){
             res.status(400).json({message: "Invalid Admin Credentials"});
@@ -39,7 +35,7 @@ router.post("/admin/login", async(req, res)=>{
 
         let token = jwt.sign({id : admin._id}, "secret-key", {expiresIn:"1h"});
 
-        res.cookie("token", token);
+        res.cookie("token", token,{httpOnly:true,sameSite:"strict", maxAge: 60 * 60 * 1000});
         res.status(200).json({message : `Admin Login Success`, success: true, token});
 
     } catch (error) {
@@ -51,7 +47,7 @@ router.post("/admin/login", async(req, res)=>{
 router.post("/admin/logout", (req, res)=>{
 
     try {
-        res.cookie("token","", {expires : new Date()}).json({message : "Admin Logout Success", success : true})
+        res.cookie("token","", {expires : new Date()}).status(200).json({message : "Admin Logout Success", success : true})
     } catch (error) {
         console.log("some error in admin logging out", error);
         res.status(500).send("error " + error.message);

@@ -8,12 +8,12 @@ import adminRoutes from "./src/routes/adminRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 
-import cookieParser from "cookie-parser";
+import parser from "cookie-parser";
 
 const app = express();
 
 app.use(express.json());
-app.use(cookieParser());
+app.use(parser());
 
 app.use(cors({
     origin : "http://localhost:5173",
