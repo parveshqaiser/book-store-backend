@@ -19,14 +19,14 @@ router.post("/register/user", async(req, res)=>{
             return res.status(400).json({message : "User Already Exist", success : false});
         }
 
-        let hasPassword = await bcrypt.hash(password,10);
+        let hashPassword = await bcrypt.hash(password,10);
 
         let createUser = await UserSchema.create({
             name,
             username,
             email,
             number,
-            password :hasPassword,
+            password : hashPassword,
         });
 
         res.status(201).json({message:"User Added Successfully", success: true});

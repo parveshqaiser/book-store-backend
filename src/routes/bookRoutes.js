@@ -57,14 +57,14 @@ router.get("/getBookById/:id",authentication, async(req, res)=>{
     try {
         let id = req.params.id;
 
-        let findBookById = await BookSchema.findOne({_id: id});
+        let singleBook = await BookSchema.findOne({_id: id});
 
-        if(!findBookById)
+        if(!singleBook)
         {
             return res.status(400).json({message : "No Book Found", success : false});
         }
 
-        res.status(200).json({message : "Fetch Successful", success : true, data :findBookById})
+        res.status(200).json({message : "Fetch Successful", success : true, data :singleBook})
     } catch (error) {
         console.log("some issue in fetching single book", error);
         res.status(500).send("error " + error.message);
