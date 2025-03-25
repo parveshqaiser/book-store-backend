@@ -38,5 +38,5 @@ dbConnection().then(()=>{
     })
 }).catch((err)=>{
     console.log("Error connecting Database",err );
-})
+});
 

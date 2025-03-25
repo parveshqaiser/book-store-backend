@@ -2,18 +2,34 @@
 import express from "express";
 import BookSchema from "../model/bookSchema.js";
 import authentication from "../middleware/auth.js";
+import uploadFile from "../middleware/multer.js";
+import getDataUrl from "../utils/DataUri.js";
+import cloudServer from "../middleware/cloudinary.js";
 
 const router = express.Router();
 
-
-router.post("/addBook",authentication, async(req, res)=>{
+router.post("/addBook",authentication, uploadFile.single("coverPic") , async(req, res, next)=>{
 
     try {
-        let { title,author,description,quantity,isAvailable,publisher,pages,language,newPrice,oldPrice,coverPic} = req.body;
+        let {title,author, category ,description,quantity,publisher,pages,language,newPrice,oldPrice,coverPic} = req.body;
+
+        let file = req.file;
+        let cloudUrl;
+
+        if(req.file !== undefined)
+        {
+            let bufferUrl = getDataUrl(file);
+            try {
+                cloudUrl = await cloudServer.uploader.upload(bufferUrl)
+            } catch (error) {
+                console.log("inner error ", error);
+            }
+        }
 
         let bookDetails = await BookSchema.create({
             title,
             author,
+            category,
             description,
             publisher,
             pages,
@@ -21,8 +37,6 @@ router.post("/addBook",authentication, async(req, res)=>{
             newPrice,
             oldPrice,
             quantity,
-            isAvailable,
-            coverPic,
         });
 
         if(!bookDetails){
