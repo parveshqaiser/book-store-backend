@@ -37,6 +37,7 @@ router.post("/addBook",authentication, uploadFile.single("coverPic") , async(req
             newPrice,
             oldPrice,
             quantity,
+            coverPic : cloudUrl?.secure_url
         });
 
         if(!bookDetails){
@@ -53,10 +54,10 @@ router.post("/addBook",authentication, uploadFile.single("coverPic") , async(req
 router.get("/getAllBooks",authentication, async(req, res)=>{
 
     try {
-        let findAllBooks = await BookSchema.find({});
+        let findAllBooks = await BookSchema.find().sort({ createdAt: -1 });
 
         if(findAllBooks.length ==0){
-            return res.status(200).json({message : "Book List is Empty", success : false});
+            return res.status(200).json({message : "Book List is Empty", success : true});
         }
 
         res.status(200).json({message : "Data fetch Successfully", success : true, data : findAllBooks});
@@ -88,7 +89,7 @@ router.get("/getBookById/:id",authentication, async(req, res)=>{
 router.put("/updateBook/:id",authentication, async(req,res)=>{
 
     try {
-        let { title,author,description,publisher,pages,language,newPrice,oldPrice} = req.body;
+        let {title,author,description,category,publisher,pages,language,newPrice,oldPrice, quantity} = req.body;
 
         let id = req.params.id;
         let book = await BookSchema.findOne({_id: id});
