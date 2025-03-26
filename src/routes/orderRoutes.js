@@ -10,97 +10,95 @@ const router = express.Router();
 // for user
 router.post("/order/book/", authentication,async(req,res)=>{
 
-     try {
-          let {name, email, number,address,totalPrice, orderedQuantity, products} = req.body;
+    try {
+		let {name, email, number,address,totalPrice, orderedQuantity, products} = req.body;
 
-          // console.log("********* ", req.body);
+		let book;
+		for(let item of products)
+		{
+			book= await BookSchema.findById({_id : item.productId});
 
-          let book;
-          for(let item of products)
-          {
-              book= await BookSchema.findById({_id : item.productId});
+			if(!book){
+				return  res.status(400).json({message: "Invalid Book ID", success : false});
+			}
 
-               if(!book){
-                    return  res.status(400).json({message: "Invalid Book ID", success : false});
-               }
+			if(book.quantity < orderedQuantity)
+			{
+				return res.status(400).json({message: `Only ${book.quantity} Books are available`,success: false});
+			}
 
-               if(book.quantity <orderedQuantity)
-               {
-                    return res.status(400).json({message: `Only ${book.quantity} Books are available`,success: false});
-               }
+			book.quantity -= item.quantity;
+			book.quantity == 0 ? book.isAvailable = false : true,
+			await book.save();
+		}
 
-               book.quantity -= item.quantity;
-               book.quantity == 0 ? book.isAvailable = false : true,
-               await book.save();
-          }
-
-          let placeOrder = await OrderSchema.create({
-               name,
-               email,
-               number,
-               totalPrice,
-               orderedQuantity,
-               address : {
-                    doorNo : address.doorNo,
-                    city : address.city,
-                    state : address.state,
-                    pinCode : address.pinCode,
-               },
-               product :products
-          });
+        let placeOrder = await OrderSchema.create({
+			name,
+			email,
+			number,
+			totalPrice,
+			orderedQuantity,
+			address : {
+				doorNo : address.doorNo,
+				city : address.city,
+				state : address.state,
+				pinCode : address.pinCode,
+			},
+			product :products
+        });
 
           // console.log("placeOrder ", placeOrder);
 
-          if(!placeOrder){
-               return res.status(400).json({message : "Failed To place Order", success : true});
-          }
+        if(!placeOrder){
+            return res.status(400).json({message : "Failed To place Order", success : true});
+        }
 
-          res.status(200).json({message : "Order Placed Successfully", success : true});
+        res.status(200).json({message : "Order Placed Successfully", success : true});
                
-     } catch (error) {
-          console.log("some error in ordering book", error);
-          res.status(500).json({ message: "Failed to create order" });
-     }
+    } catch (error) {
+        console.log("some error in ordering book", error);
+        res.status(500).json({ message: "Failed to create order" });
+    }
 });
 
+// for admin
 router.get("/received/orders/user", authentication, async(req, res)=>{
 
-     try {
-          
-          let query = [
-               {
-                    $match: {
-                         orderStatus: "Pending",
-                    }
-               },
-               {
-                    $lookup: {
-                         from: "books",
-                         localField: "product.productId",
-                         foreignField: "_id",
-                         as : "bookDetails",
-                         pipeline :[{
-                              $project : {
-                                   title: 1,
-                                   author: 1,
-                                   "_id": 0
-                              }}],
-                         }
-               },
-          ];
+	try {
+		let query = [
+			{
+				$match: {
+					orderStatus: "Pending",
+				}
+			},
+			{
+				$lookup: {
+					from: "books",
+					localField: "product.productId",
+					foreignField: "_id",
+					as : "bookDetails",
+					pipeline :[{
+						$project : {
+							title: 1,
+							author: 1,
+							"_id": 0
+					}}],
+				}
+			},
+		];
 
-          let userOrders = await OrderSchema.aggregate(query);
+        let userOrders = await OrderSchema.aggregate(query);
 
-          if(userOrders.length ==0)
-          {
-               return res.status(200).json({message : "No New Orders Found", success:false , data : []});
-          }
+        if(userOrders.length ==0)
+        {
+            return res.status(200).json({message : "No New Orders Found", success:false , data : []});
+        }
 
-          res.status(200).json({message : "Order Details Fetched", userOrders, success : true});
-     } catch (error) {
-          console.log("some error in fetching pending order", error);
-          res.status(500).json({ message: "some error in fetching order details" });
-     }
+        res.status(200).json({message : "Order Details Fetched", userOrders, success : true});
+    }catch (error) {
+        console.log("some error in fetching pending order", error);
+        res.status(500).json({ message: "some error in fetching order details" });
+	}
 });
 
 router.post("/update/order/status/:id", authentication, async(req, res)=>{

@@ -33,9 +33,9 @@ router.post("/admin/login", async(req, res)=>{
             return;
         }
 
-        let token = jwt.sign({id : admin._id}, "secret-key", {expiresIn:"1h"});
+        let token = jwt.sign({id : admin._id}, "secret-key", {expiresIn:"2h"});
 
-        res.cookie("token", token,{httpOnly:true,sameSite:"strict", maxAge: 60 * 60 * 1000});
+        res.cookie("token", token,{httpOnly:true,sameSite:"strict", maxAge: 60 * 60 * 2000});
         res.status(200).json({message : `Admin Login Success`, success: true, token});
 
     } catch (error) {

@@ -8,7 +8,7 @@ const authentication = (req, res,next)=>{
         
         if(!getCookie)
         {
-            res.status(401).json({message: "Unauthorized User"});
+            res.status(401).json({message: "Unauthorized User", status : 401});
             return;
         }
 
