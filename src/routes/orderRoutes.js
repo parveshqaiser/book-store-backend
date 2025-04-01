@@ -47,8 +47,6 @@ router.post("/order/book/", authentication,async(req,res)=>{
 			product :products
         });
 
-          // console.log("placeOrder ", placeOrder);
-
         if(!placeOrder){
             return res.status(400).json({message : "Failed To place Order", success : true});
         }
@@ -61,7 +59,8 @@ router.post("/order/book/", authentication,async(req,res)=>{
     }
 });
 
-// for admin
+// below are for admin
+
 router.get("/received/orders/user", authentication, async(req, res)=>{
 
 	try {
@@ -81,6 +80,8 @@ router.get("/received/orders/user", authentication, async(req, res)=>{
 						$project : {
 							title: 1,
 							author: 1,
+							publisher :1,
+							language :1,
 							"_id": 0
 					}}],
 				}
@@ -94,7 +95,7 @@ router.get("/received/orders/user", authentication, async(req, res)=>{
             return res.status(200).json({message : "No New Orders Found", success:false , data : []});
         }
 
-        res.status(200).json({message : "Order Details Fetched", userOrders, success : true});
+        res.status(200).json({message : "Order Details Fetched", data :userOrders, success : true});
     }catch (error) {
         console.log("some error in fetching pending order", error);
         res.status(500).json({ message: "some error in fetching order details" });
@@ -103,28 +104,72 @@ router.get("/received/orders/user", authentication, async(req, res)=>{
 
 router.post("/update/order/status/:id", authentication, async(req, res)=>{
 
-     try {
-          let {orderStatus} = req.body;
-          let orderId = req.params.id;
+    try {
+		let {orderStatus} = req.body;
+		let orderId = req.params.id;
 
-          if(!["Delivered"].includes(orderStatus))
-          {
-               return res.status(400).json({message : "Invalid Status", success : false});
-          }
+		if(!["Delivered"].includes(orderStatus))
+		{
+			return res.status(400).json({message : "Invalid Status", success : false});
+		}
 
-          let orderDetails = await OrderSchema.findById({_id:orderId, orderStatus:"Pending"});
-          if(!orderDetails){
-               return res.status(400).json({message : "Order Details Doesn't Exist", success : false});
-          }
+		let orderDetails = await OrderSchema.findById({_id:orderId, orderStatus:"Pending"});
+		if(!orderDetails){
+			return res.status(400).json({message : "Order Details Doesn't Exist", success : false});
+		}
 
-          orderDetails.orderStatus= orderStatus;
-          await orderDetails.save();
+		orderDetails.orderStatus= orderStatus;
+		await orderDetails.save();
 
-          res.status(200).json({message : "Order Status Changed to Delivered", success:true, orderDetails})
-     } catch (error) {
-          console.log("error in updating order status", error);
-          res.status(500).json({ message: "error in updating order status" });
-     }
+        res.status(200).json({message : "Order Status Changed to Delivered", success:true, orderDetails})
+    } catch (error) {
+        console.log("error in updating order status", error);
+        res.status(500).json({ message: "error in updating order status" });
+    }
+});
+
+router.get("/received/orders/delivered", authentication, async(req, res)=>{
+
+	try {
+		let query = [
+			{
+				$match: {
+					orderStatus: "Delivered",
+				}
+			},
+			{
+				$lookup: {
+					from: "books",
+					localField: "product.productId",
+					foreignField: "_id",
+					as : "bookDetails",
+					pipeline :[{
+						$project : {
+							title: 1,
+							author: 1,
+							publisher :1,
+							category :1,
+							pages :1,
+							language:1,
+							coverPic:1,
+							"_id": 0
+					}}],
+				}
+			},
+		];
+
+        let deliverOrders = await OrderSchema.aggregate(query);
+
+        if(deliverOrders.length ==0)
+        {
+            return res.status(200).json({message : "No New Orders Found", success:true , data : []});
+        }
+
+        res.status(200).json({message : "Delivered Orders Fetched", data :deliverOrders, success : true});
+    }catch (error) {
+        console.log("some error in fetching delivered order", error);
+        res.status(500).json({ message: "ome error in fetching delivered order"});
+	}
 });
 
 export default router;
