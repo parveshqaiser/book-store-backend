@@ -6,10 +6,6 @@ const userModel = new mongoose.Schema({
         type : String,
         required : true,
     },
-    username : {
-        type : String,
-        required : true,
-    },
     email : {
         type : String,
         required : true,
@@ -17,9 +13,23 @@ const userModel = new mongoose.Schema({
         index :true,
         trim : true
     },
+    role : {
+        type : String,
+        default : "user",
+    },
     number : {
         type : Number,
-        required : true,
+        default : null,
+    },
+    isUserVerified : {
+        type : Boolean,
+        default : false,
+    },
+    otp : {
+        type : Number,
+    },
+    otpExpiry : {
+        type : String,
     },
     password : {
         type : String,
