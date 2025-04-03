@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import validator from "validator";
 import transporter from "../service/nodeMailer.js";
+import authentication from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -187,6 +188,24 @@ router.post("/user/logout", (req, res)=>{
         res.status(500).send("error " + error.message);
     }
 });
+
+router.get("/user/details",authentication, async(req, res)=>{
+
+    try {
+        let id = req.id;
+        let findUser = await UserSchema.findById({_id : id}).select("-password");
+
+        if(!findUser)
+        {
+            return res.status(404).json({message : "User Data Not Found", success : false});
+        }
+
+        res.status(200).json({message : "User Data Fetched", data : findUser, success : true});
+    } catch (error) {
+        console.log("some error in logging out", error);
+        res.status(500).send("error " + error.message);
+    }
+})
 
 export default router;
 
