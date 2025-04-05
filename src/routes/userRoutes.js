@@ -14,6 +14,12 @@ router.post("/register/user", async(req, res)=>{
     try {
         let {name, email,password} = req.body;
 
+        if(!validator.isEmail(email))
+        {
+            res.status(400).json({message : "Invalid Email", success : false});
+            return;
+        }
+
         let userExist = await UserSchema.findOne({email, isUserVerified:true});
         if(userExist){
             return res.status(400).json({message : "User Already Exist with this Email", success : false});
@@ -60,7 +66,7 @@ router.post("/register/user", async(req, res)=>{
 
     } catch (error) {
         console.log("some issue in registering user", error);
-        res.status(500).send("error " + error.message);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
@@ -69,30 +75,36 @@ router.post("/verify/otp", async(req, res)=>{
     try {
         let {email,otp} = req.body;
 
-        let user = await UserSchema.findOne({email});
+        let user = await UserSchema.findOne({email}).select('-password');
         if (!user) {
-            return res.status(400).json({ message: "User Not Found", success: false });
+            return res.status(404).json({ message: "User Not Found", success: false });
         }
 
-        // if user is already verified
         if (user.isUserVerified) {
             return res.status(400).json({ message: "User Already Verified", success: false });
         }
 
-        if(otp !== user.otp || user.otpExpiry < Date.now())
-        {
-            return res.status(400).json({ message: "Invalid OTP / OTP Expired", success: false });
+        if (user.otpExpiry < Date.now()) {
+            return res.status(410).json({ message: "OTP Expired", success: false });
         }
 
-        user.otp = otp;
+        if(otp != user.otp)
+        {
+            return res.status(400).json({ message: "Invalid OTP", success: false });
+        }
+
+        let token = jwt.sign({id: user._id}, "secret-key",{expiresIn:"1h"});
+
+        user.otp = parseInt(otp) || 0;
         user.isUserVerified = true;
         await user.save();
 
-        res.status(200).json({message : "User Verified Successfully", success : true})
+        res.cookie("token", token);
+        res.status(200).json({message : "User Verified Successfully", data : user, success : true})
 
     } catch (error) {
         console.log("some issue in verifying otp", error);
-        res.status(500).send("error " + error.message);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 })
 
@@ -130,11 +142,11 @@ router.post("/resend/otp",async(req, res)=>{
 
         let emailInfo = await transporter.sendMail(mailOptions);
 
-        res.status(200).json({message : "Otp Sent Successfully. Check Email", success : true});
+        res.status(200).json({message : "Otp Sent Successfully. Check Your Email", success : true});
 
     } catch (error) {
         console.log("some issue in resending otp", error);
-        res.status(500).send("error " + error.message);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
@@ -154,7 +166,7 @@ router.post("/user/login", async(req, res)=>{
             return;
         }
 
-        let user = await UserSchema.findOne({email :email, username :username});
+        let user = await UserSchema.findOne({email});
 
         if(!user){
             res.status(400).json({message: "Invalid Credentials", success : false});
@@ -169,23 +181,32 @@ router.post("/user/login", async(req, res)=>{
         }
 
         let token = jwt.sign({id: user._id}, "secret-key",{expiresIn:"1h"});
+        let data = {
+            name : user.name,
+            email : user.email,
+            role : user.role,
+            number : user.number || null,
+            isUserVerified : user.isUserVerified,
+            otp : user.otp,
+            otpExpiry : user.otpExpiry,
+        };
 
         res.cookie("token", token);
-        res.status(200).json({message : `Welcome ${user.name}`, success: true, token, user});
+        res.status(200).json({message : `Welcome ${user.name}`, success: true, token, data: data});
 
     } catch (error) {
         console.log("some error in logging in", error);
-        res.status(500).send("error " + error.message);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
 router.post("/user/logout", (req, res)=>{
 
     try {
-        res.cookie("token","", {expires : new Date()}).json({message : "User Logout Success", success : true})
+        res.status(200).cookie("token","", {expires : new Date()}).json({message : "User Logout Success", success : true})
     } catch (error) {
         console.log("some error in logging out", error);
-        res.status(500).send("error " + error.message);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
@@ -203,7 +224,7 @@ router.get("/user/details",authentication, async(req, res)=>{
         res.status(200).json({message : "User Data Fetched", data : findUser, success : true});
     } catch (error) {
         console.log("some error in logging out", error);
-        res.status(500).send("error " + error.message);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 })
 
