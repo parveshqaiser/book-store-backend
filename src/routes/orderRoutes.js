@@ -4,16 +4,18 @@ import express from "express";
 import authentication from "../middleware/auth.js";
 import BookSchema from "../model/bookSchema.js";
 import OrderSchema from "../model/orderSchema..js";
+import UserSchema from "../model/userSchema.js";
 
 const router = express.Router();
 
 // for user
-router.post("/order/book/", authentication,async(req,res)=>{
+router.post("/order/book", authentication,async(req,res)=>{
 
     try {
 		let {name, email, number,address,totalPrice, orderedQuantity, products} = req.body;
 
 		let book;
+		// below is to modify the qty in book schema
 		for(let item of products)
 		{
 			book= await BookSchema.findById({_id : item.productId});
@@ -48,20 +50,18 @@ router.post("/order/book/", authentication,async(req,res)=>{
         });
 
         if(!placeOrder){
-            return res.status(400).json({message : "Failed To place Order", success : true});
+            return res.status(400).json({message : "Failed To place Order", success : false});
         }
 
-        res.status(200).json({message : "Order Placed Successfully", success : true});
+        res.status(200).json({message : "Order Placed Successfully", success : true , data : placeOrder});
                
     } catch (error) {
         console.log("some error in ordering book", error);
-        res.status(500).json({ message: "Failed to create order" });
+		res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
-// below are for admin
-
-router.get("/received/orders/user", authentication, async(req, res)=>{
+router.get("/admin/orders/pending", authentication, async(req, res)=>{
 
 	try {
 		let query = [
@@ -102,7 +102,7 @@ router.get("/received/orders/user", authentication, async(req, res)=>{
 	}
 });
 
-router.post("/update/order/status/:id", authentication, async(req, res)=>{
+router.post("/admin/update/order/status/:id", authentication, async(req, res)=>{
 
     try {
 		let {orderStatus} = req.body;
@@ -128,7 +128,7 @@ router.post("/update/order/status/:id", authentication, async(req, res)=>{
     }
 });
 
-router.get("/received/orders/delivered", authentication, async(req, res)=>{
+router.get("/admin/orders/delivered", authentication, async(req, res)=>{
 
 	try {
 		let query = [
@@ -169,6 +169,46 @@ router.get("/received/orders/delivered", authentication, async(req, res)=>{
     }catch (error) {
         console.log("some error in fetching delivered order", error);
         res.status(500).json({ message: "ome error in fetching delivered order"});
+	}
+});
+
+router.get("/user/orders",authentication, async(req, res)=>{
+	try {
+		let id = req.id;
+
+		let user = await UserSchema.findOne({_id:id});
+		let query = [
+			{
+				$match: {
+					email: user.email,
+					orderStatus : "Pending",
+				}
+			},
+			{
+				$lookup: {
+					from: "books",
+					localField: "product.productId",
+					foreignField: "_id",
+					as : "bookDetails",
+					pipeline :[{
+						$project : {
+							title: 1,
+							author: 1,
+							publisher :1,
+							language :1,
+							"_id": 0
+					}}],
+				}
+			},
+		];
+
+		let userOrders = await OrderSchema.aggregate(query);
+
+
+		res.status(200).json({message :`${userOrders.length ==0}` ? "No Pending Orders" : "Orders Fetched",data :userOrders, success : true});
+	} catch (error) {
+		console.log("err ", error);
+		res.status(500).json({ message: "Server Error", error: error.message, success: false });
 	}
 });
 
