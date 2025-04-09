@@ -172,7 +172,7 @@ router.get("/admin/orders/delivered", authentication, async(req, res)=>{
 	}
 });
 
-router.get("/user/orders",authentication, async(req, res)=>{
+router.get("/user/orders/pending",authentication, async(req, res)=>{
 	try {
 		let id = req.id;
 
@@ -196,6 +196,48 @@ router.get("/user/orders",authentication, async(req, res)=>{
 							author: 1,
 							publisher :1,
 							language :1,
+							coverPic :1,
+							"_id": 0
+					}}],
+				}
+			},
+		];
+
+		let userOrders = await OrderSchema.aggregate(query);
+
+
+		res.status(200).json({message :`${userOrders.length ==0}` ? "No Pending Orders" : "Orders Fetched",data :userOrders, success : true});
+	} catch (error) {
+		console.log("err ", error);
+		res.status(500).json({ message: "Server Error", error: error.message, success: false });
+	}
+});
+
+router.get("/user/orders/delivered",authentication, async(req, res)=>{
+	try {
+		let id = req.id;
+
+		let user = await UserSchema.findOne({_id:id});
+		let query = [
+			{
+				$match: {
+					email: user.email,
+					orderStatus : "Delivered",
+				}
+			},
+			{
+				$lookup: {
+					from: "books",
+					localField: "product.productId",
+					foreignField: "_id",
+					as : "bookDetails",
+					pipeline :[{
+						$project : {
+							title: 1,
+							author: 1,
+							publisher :1,
+							language :1,
+							coverPic :1,
 							"_id": 0
 					}}],
 				}
