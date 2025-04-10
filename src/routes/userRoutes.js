@@ -226,6 +226,29 @@ router.get("/user/details",authentication, async(req, res)=>{
         console.log("some error in logging out", error);
         res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
+});
+
+router.patch("/update/profile", authentication, async(req, res)=>{
+    try {
+        let id = req.id;
+        let {name,number} = req.body;
+
+        let user = await UserSchema.findOne({_id:id});
+        
+        if (!user) {
+            return res.status(404).json({ message: "User Not Found", success: false });
+        }
+
+        user.number = number;
+        user.name = name;
+        await user.save();
+
+        res.status(200).json({message : "Profile Updated", success : true});
+
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
 })
 
 export default router;
