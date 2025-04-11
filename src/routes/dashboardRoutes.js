@@ -7,28 +7,27 @@ import UserSchema from "../model/userSchema.js";
 
 const router = express.Router();
 
-// users that have registered in the application
 router.get("/allUsers",authentication, async(req, res)=>{
 
     try {
-        let getAllUsers = await UserSchema.find();
+        let alUsers = await UserSchema.find().select("name email number");
 
-        res.status(200).json({data : getAllUsers.length || 0 })
+        res.status(200).json({message : `${alUsers.length>0}`? "Users Found" : "No Users" , data : alUsers, success : true})
     } catch (error) {
-        console.log("some error in getting total users", error);
-        res.status(500).json({ message: "some error in getting total users" });
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
 router.get("/getTotalBooks", authentication, async(req, res)=>{
 
     try {
-        let getAllBooks = await BookSchema.find();
+        let allBooks = await BookSchema.countDocuments();
 
-        res.status(200).json({data : getAllBooks.length || 0 })
+        res.status(200).json({ message: allBooks > 0 ? "Books Found" : "No Books", data : allBooks,success : true})
     } catch (error) {
-        console.log("some error in getting all books", error);
-        res.status(500).json({ message: "some error in getting total books"});
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
@@ -38,30 +37,30 @@ router.get("/getTotalQuantitySold", authentication, async(req, res)=>{
         let query = [
         {
             $match: {
-            orderStatus : "Delivered"
+                orderStatus : "Delivered"
             }
         },
         {
             $group: {
-            _id: null,
-            totalQtySold : {
-                $sum : "$orderedQuantity"
-            }      
+                _id: null,
+                totalQtySold : {
+                    $sum : "$orderedQuantity"
+                }         
             }
         },
         {
             $project: {
-            _id : 0,
-            totalQtySold :1
+                _id : 0,
+                totalQtySold :1
             }
         }];
 
         let totalQtySold = await OrderSchema.aggregate(query);
-
-        res.status(200).json({data : totalQtySold || []})
+    
+        res.status(200).json({ message: "Details Fetched", data : totalQtySold,success : true})
     } catch (error) {
-        console.log("some error in total sold qty", error);
-        res.status(500).json({ message: "some error in getting total sold qty"});
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
@@ -90,11 +89,11 @@ router.get("/getTotalSales",authentication, async(req, res)=>{
 
             let getSalesDetails = await OrderSchema.aggregate(query);
 
-            res.status(200).json({data : getSalesDetails});
+            res.status(200).json({data : getSalesDetails , message :`${getSalesDetails.length > 0}` ? "Data Fetched" : "No Data Found"});
 
     } catch (error) {
-         console.log("some error in getting total sales details", error);
-         res.status(500).json({ message: "some error in getting sales details" });
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
@@ -130,7 +129,7 @@ router.get("/sales/category/wise", authentication, async(req, res)=>{
         {
             $group: {
                 _id: "$bookDetails.category",
-                totalSales: {
+                totalItem: {
                     $sum: 1
                 }
             }
@@ -139,17 +138,17 @@ router.get("/sales/category/wise", authentication, async(req, res)=>{
             $project: {
                 _id: 0,
                 genre: "$_id",
-                totalSales: 1
+                totalItem: 1
             }
         }];
 
         let categoryWiseSales = await OrderSchema.aggregate(query);
 
-        res.status(200).json({data :categoryWiseSales || []})
+        res.status(200).json({data : categoryWiseSales || [] ,message : "Data Fetched" , success : true})
         
     } catch (error) {
-        console.log("some error in getting all category wise book sales", error);
-        res.status(500).json({ message: "some error in getting all category wise book sales"});
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
@@ -190,11 +189,11 @@ router.get("/revenue/monthly/wise", authentication, async(req, res)=>{
 
         let monthlySales = await OrderSchema.aggregate(query);
 
-        res.status(200).json({data : monthlySales || []})
+        res.status(200).json({data : monthlySales , message : "Data Fetched", success : true});
 
     } catch (error) {
-        console.log("some error in getting monthly sales", error);
-        res.status(500).json({ message: "some error in getting monthly sales"});
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
