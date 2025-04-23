@@ -249,6 +249,41 @@ router.patch("/update/profile", authentication, async(req, res)=>{
         console.log("err", error);
         res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
+});
+
+router.post("/update/password", authentication, async(req, res)=>{
+
+    try {
+        let id = req.id;
+        let {password, newPassword} =req.body;
+
+        if(!password || (password && password.trim() == "")){
+            return res.status(400).json({message : "Password Required" , success : false});
+        }
+
+        if(!newPassword || (newPassword && newPassword.trim() == "")){
+            return res.status(400).json({message : "New Password Required" , success : false});
+        }
+
+        let user = await UserSchema.findOne({_id:id});
+
+        let isPasswordMatched = await bcrypt.compare(password, user.password);
+
+        if(!isPasswordMatched){
+            return res.status(400).json({message : "Incorrect Password", success: false});
+        }
+
+        let hashPassword = await bcrypt.hash(newPassword,10);
+
+        user.password = hashPassword;
+        await user.save();
+
+        res.status(200).json({message : "Password Updated", success: true});
+        
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
 })
 
 export default router;

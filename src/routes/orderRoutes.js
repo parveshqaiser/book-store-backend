@@ -216,8 +216,8 @@ router.get("/user/orders/pending",authentication, async(req, res)=>{
 router.get("/user/orders/delivered",authentication, async(req, res)=>{
 	try {
 		let id = req.id;
-
 		let user = await UserSchema.findOne({_id:id});
+
 		let query = [
 			{
 				$match: {
@@ -245,9 +245,11 @@ router.get("/user/orders/delivered",authentication, async(req, res)=>{
 		];
 
 		let userOrders = await OrderSchema.aggregate(query);
-
-
-		res.status(200).json({message :`${userOrders.length ==0}` ? "No Pending Orders" : "Orders Fetched",data :userOrders, success : true});
+		res.status(200).json({
+			message: userOrders.length > 0 ? "Orders Fetched" : "No Data",
+			data: userOrders,
+			success: true,
+		});
 	} catch (error) {
 		console.log("err ", error);
 		res.status(500).json({ message: "Server Error", error: error.message, success: false });
