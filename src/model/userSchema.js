@@ -1,6 +1,26 @@
 
 import mongoose from "mongoose";
 
+
+const addressSchema = new mongoose.Schema({
+    doorNo : {
+        type : String,
+        required : true,
+    },
+    city : {
+        type : String,
+        required : true,
+    },
+    state : {
+        type : String,
+        required : true,
+    },
+    pinCode: {
+        type : Number,
+        required : true,
+    }
+},{_id:false});
+
 const userModel = new mongoose.Schema({
     name : {
         type : String,
@@ -34,7 +54,8 @@ const userModel = new mongoose.Schema({
     password : {
         type : String,
         required : true,
-    }
+    },
+    address : [addressSchema]
 },{timestamps:true});
 
 const UserSchema = mongoose.model("users", userModel);

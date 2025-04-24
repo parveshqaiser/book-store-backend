@@ -267,6 +267,11 @@ router.post("/update/password", authentication, async(req, res)=>{
 
         let user = await UserSchema.findOne({_id:id});
 
+        if(!user)
+        {
+            return res.status(404).json({message : "Invalid User", success : false});
+        }
+
         let isPasswordMatched = await bcrypt.compare(password, user.password);
 
         if(!isPasswordMatched){
@@ -279,12 +284,75 @@ router.post("/update/password", authentication, async(req, res)=>{
         await user.save();
 
         res.status(200).json({message : "Password Updated", success: true});
-        
+
     } catch (error) {
         console.log("err", error);
         res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
-})
+});
+
+router.post("/add/address", authentication, async(req, res)=>{
+
+    try {
+        let id = req.id;
+        let {doorNo, city, state,pinCode} = req.body;
+
+        let user = await UserSchema.findOne({_id:id});
+
+        if(!user){
+            return res.status(404).json({message : "Invalid User", success : false});
+        }
+       
+        user.address.push({doorNo, city, state,pinCode});
+
+        await user.save();
+        res.status(200).json({message : "New Address Added Successfully", success: true});
+
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+});
+
+router.put("/update/address/:index", authentication, async(req, res)=>{
+
+    try {
+        let id = req.id;
+        let index = parseInt(req.params.index);
+
+        let {doorNo, city, state,pinCode} = req.body;
+
+        let user = await UserSchema.findOne({_id:id});
+
+        if(!user){
+            return res.status(404).json({message : "Invalid User", success : false});
+        }
+
+        if (index < 0 || index >= user.address.length) {
+            return res.status(400).json({ message: "Invalid address index", success: false });
+        }
+
+        user.address = user.address.map((val,idx)=>{
+            if(index == idx){
+                return{
+                    doorNo,
+                    city, 
+                    state,
+                    pinCode
+                }
+            }
+            return val;
+        });
+        
+        await user.save();
+
+        res.status(200).json({message : "Address Updated Successfully", success: true});
+
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+});
 
 export default router;
 
