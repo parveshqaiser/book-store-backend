@@ -213,11 +213,10 @@ router.post("/user/logout", (req, res)=>{
 router.get("/user/details",authentication, async(req, res)=>{
 
     try {
-        let id = req.id;
+        let id = req.id; // user id
         let findUser = await UserSchema.findById({_id : id}).select("-password");
 
-        if(!findUser)
-        {
+        if(!findUser){
             return res.status(404).json({message : "User Data Not Found", success : false});
         }
 
@@ -353,6 +352,31 @@ router.put("/update/address/:index", authentication, async(req, res)=>{
         res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
+
+router.delete("/delete/address/:index", authentication, async(req, res)=>{
+
+    try {
+        let id = req.id;
+        let delIndex = parseInt(req.params.index);
+
+        let user = await UserSchema.findOne({_id:id});
+
+        if(!user){
+            return res.status(404).json({message : "Invalid User", success : false});
+        }
+
+        if (delIndex < 0 || delIndex >= user.address.length) {
+            return res.status(400).json({ message: "Invalid address index", success: false });
+        }
+
+        user.address.splice(delIndex,1);
+        await user.save();
+        res.status(200).json({message : "Address Deleted Successfully", success: true});
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+})
 
 export default router;
 
