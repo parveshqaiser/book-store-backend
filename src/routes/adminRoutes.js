@@ -19,7 +19,7 @@ router.post("/admin/login", async(req, res)=>{
             return;
         }
 
-        let admin = await AdminSchema.findOne({username : username});
+        let admin = await AdminSchema.findOne({username});
 
         if(!admin){
             res.status(400).json({message: "Invalid Admin Credentials"});
@@ -35,8 +35,14 @@ router.post("/admin/login", async(req, res)=>{
 
         let token = jwt.sign({id : admin._id}, "secret-key", {expiresIn:"2h"});
 
+       let data = {
+            username : admin.username,
+            role : admin.role,
+            token,
+       };
+
         res.cookie("token", token,{httpOnly:true,sameSite:"strict", maxAge: 60 * 60 * 2000});
-        res.status(200).json({message : `Admin Login Success`, success: true, token});
+        res.status(200).json({message : `Admin Login Success`, success: true, data});
 
     } catch (error) {
         console.log("some error in logging admin", error);

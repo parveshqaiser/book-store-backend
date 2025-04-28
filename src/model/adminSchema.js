@@ -9,7 +9,11 @@ const adminModel = new mongoose.Schema({
     password : {
         type : String,
         required : true,
-    }
+    },
+    role : {
+        default : "admin",
+        type : String
+    },
 },{timestamps:true});
 
 const AdminSchema = mongoose.model("admins", adminModel);
