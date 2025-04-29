@@ -197,5 +197,16 @@ router.get("/revenue/monthly/wise", authentication, async(req, res)=>{
     }
 });
 
+router.get("/get/total/orders", authentication, async(req, res)=>{
+
+    try {
+        let ordersLength = await OrderSchema.countDocuments();
+
+        res.status(200).json({ message: ordersLength > 0 ? "Order Found" : "No Order", data : ordersLength,success : true})
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+});
 
 export default router;
