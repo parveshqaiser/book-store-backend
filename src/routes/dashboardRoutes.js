@@ -89,7 +89,7 @@ router.get("/getTotalSales",authentication, async(req, res)=>{
 
             let getSalesDetails = await OrderSchema.aggregate(query);
 
-            res.status(200).json({data : getSalesDetails , message :`${getSalesDetails.length > 0}` ? "Data Fetched" : "No Data Found"});
+            res.status(200).json({data : getSalesDetails , message :`${getSalesDetails.length > 0}` ? "Data Fetched" : "No Data Found", success : true});
 
     } catch (error) {
         console.log("err", error);
@@ -101,46 +101,47 @@ router.get("/sales/category/wise", authentication, async(req, res)=>{
 
     try {
         let query = [
-        {
-            $match: {
-                orderStatus: "Delivered"
-            }
-        },
-        {
-            $unwind: "$product"
-        },
-        {
-            $lookup: {
-                from: "books",
-                localField: "product.productId",
-                foreignField: "_id",
-                as: "bookDetails",
-                pipeline: [{
-                    $project: {
-                        category: 1,
-                        _id: 0
+            {
+                $match: {
+                    orderStatus :"Delivered"
+                }
+            },
+            {
+                $unwind: "$product"
+            },
+            {
+                $lookup: {
+                    from: "books",
+                    localField: "product.productId",
+                    foreignField: "_id",
+                    as: "bookDetails",
+                    pipeline :[{
+                        $project : {
+                            category : 1,
+                            _id:0
+                        }
+                    }]
+                }
+            },
+            {
+                $unwind: "$bookDetails"
+            },
+            {
+                $group: {
+                    _id: "$bookDetails.category",
+                    totalItemSold : {
+                        $sum : "$product.quantity"
                     }
-                }]
-            }
-        },
-        {
-            $unwind: "$bookDetails"
-        },
-        {
-            $group: {
-                _id: "$bookDetails.category",
-                totalItem: {
-                    $sum: 1
+                }
+            },
+            {
+                $project: {
+                    _id:0,
+                    genre : "$_id",
+                    totalItemSold :1
                 }
             }
-        },
-        {
-            $project: {
-                _id: 0,
-                genre: "$_id",
-                totalItem: 1
-            }
-        }];
+        ];
 
         let categoryWiseSales = await OrderSchema.aggregate(query);
 
