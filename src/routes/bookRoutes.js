@@ -5,6 +5,7 @@ import authentication from "../middleware/auth.js";
 import uploadFile from "../middleware/multer.js";
 import getDataUrl from "../utils/DataUri.js";
 import cloudServer from "../middleware/cloudinary.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -71,6 +72,11 @@ router.get("/getBookById/:id", async(req, res)=>{
 
     try {
         let id = req.params.id;
+
+        if(!mongoose.Types.ObjectId.isValid(id))
+        {
+            return res.status(400).json({ message: "Invalid Book ID", success: false });
+        }
 
         let singleBook = await BookSchema.findOne({_id: id});
 
