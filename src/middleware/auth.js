@@ -12,7 +12,7 @@ const authentication = (req, res,next)=>{
             return;
         }
 
-        let verifyToken = jwt.verify(getCookie, "secret-key");
+        let verifyToken = jwt.verify(getCookie,process.env.SECRET_KEY);
 
         req.id = verifyToken.id;
         next();

@@ -7,7 +7,7 @@ import userRoutes from "./src/routes/userRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
-
+import dotenv from "dotenv";
 import parser from "cookie-parser";
 
 const app = express();
@@ -19,6 +19,8 @@ app.use(cors({
     origin : "http://localhost:5173",
     credentials : true,
 }));
+
+dotenv.config();
 
 app.use("/", bookRoutes);
 app.use("/", userRoutes);
@@ -33,9 +35,9 @@ app.get("/", (req, res)=>{
 dbConnection().then(()=>{
     console.log("DB connected");
 
-    app.listen(7070, ()=>{
-        console.log("Server started at http://127.0.0.1:7070")
-    })
+    app.listen(7070,() => {
+        console.log('Server is running on http://localhost:7070');
+    });
 }).catch((err)=>{
     console.log("Error connecting Database",err );
 });

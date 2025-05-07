@@ -93,7 +93,7 @@ router.post("/verify/otp", async(req, res)=>{
             return res.status(400).json({ message: "Invalid OTP", success: false });
         }
 
-        let token = jwt.sign({id: user._id}, "secret-key",{expiresIn:"1h"});
+        let token = jwt.sign({id: user._id},process.env.SECRET_KEY,{expiresIn:"1h"});
 
         user.otp = parseInt(otp) || 0;
         user.isUserVerified = true;
@@ -180,7 +180,7 @@ router.post("/user/login", async(req, res)=>{
             return;
         }
 
-        let token = jwt.sign({id: user._id}, "secret-key",{expiresIn:"1h"});
+        let token = jwt.sign({id: user._id}, process.env.SECRET_KEY,{expiresIn:"1h"});
         let data = {
             name : user.name,
             email : user.email,

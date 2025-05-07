@@ -1,9 +1,6 @@
 
 // const cloudServer = require("cloudinary");
 import cloudServer from "cloudinary";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 cloudServer.v2.config({
     cloud_name :process.env.CLOUD_NAME,
