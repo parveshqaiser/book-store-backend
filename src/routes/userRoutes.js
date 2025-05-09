@@ -294,7 +294,7 @@ router.post("/add/address", authentication, async(req, res)=>{
 
     try {
         let id = req.id;
-        let {doorNo, city, state,pinCode} = req.body;
+        let {area, doorNo, city, state,pinCode, district} = req.body;
 
         let user = await UserSchema.findOne({_id:id});
 
@@ -302,7 +302,7 @@ router.post("/add/address", authentication, async(req, res)=>{
             return res.status(404).json({message : "Invalid User", success : false});
         }
        
-        user.address.push({doorNo, city, state,pinCode});
+        user.address.push({area,doorNo, city,district,state,pinCode});
 
         await user.save();
         res.status(200).json({message : "New Address Added Successfully", success: true});
@@ -319,7 +319,7 @@ router.put("/update/address/:index", authentication, async(req, res)=>{
         let id = req.id;
         let index = parseInt(req.params.index);
 
-        let {doorNo, city, state,pinCode} = req.body;
+        let {area, doorNo, city, state,pinCode, district} = req.body;
 
         let user = await UserSchema.findOne({_id:id});
 
@@ -334,8 +334,10 @@ router.put("/update/address/:index", authentication, async(req, res)=>{
         user.address = user.address.map((val,idx)=>{
             if(index == idx){
                 return{
+                    area,
                     doorNo,
                     city, 
+                    district,
                     state,
                     pinCode
                 }

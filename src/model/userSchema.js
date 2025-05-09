@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 
 
 const addressSchema = new mongoose.Schema({
+    area : {
+        type : String,
+    },
     doorNo : {
         type : String,
         required : true,
@@ -10,6 +13,9 @@ const addressSchema = new mongoose.Schema({
     city : {
         type : String,
         required : true,
+    },
+    district : {
+        type : String,
     },
     state : {
         type : String,
