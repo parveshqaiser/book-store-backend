@@ -2,6 +2,7 @@ import express  from "express";
 import cors from "cors";
 import dbConnection from "./src/database/db.js";
 
+import authRoutes from "./src/routes/authRoutes.js";
 import bookRoutes from "./src/routes/bookRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
@@ -22,6 +23,7 @@ app.use(cors({
 
 dotenv.config();
 
+app.use("/", authRoutes);
 app.use("/", bookRoutes);
 app.use("/", userRoutes);
 app.use("/", adminRoutes);

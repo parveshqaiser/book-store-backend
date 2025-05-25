@@ -61,7 +61,18 @@ const userModel = new mongoose.Schema({
         type : String,
         required : true,
     },
+    accessToken : {
+        type : String,
+        required : true,
+        default:null,
+    },
+    refreshToken : {
+        type : String,
+        required : true,
+        default:null,
+    },
     address : [addressSchema]
+    
 },{timestamps:true});
 
 const UserSchema = mongoose.model("users", userModel);
