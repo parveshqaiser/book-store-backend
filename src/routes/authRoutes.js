@@ -231,7 +231,7 @@ router.post("/verify-refresh-token", authentication,async(req, res)=>{
         await user.save();
 
         res.cookie("accessToken", newAccessToken, {sameSite:true})
-        .status(200).jsonp({message : "New Access Token Generated", success:true , newAccessToken});
+        .status(200).json({message : "New Access Token Generated", success:true , newAccessToken});
 
     } catch (error) {
         console.log("some error in logging out", error);

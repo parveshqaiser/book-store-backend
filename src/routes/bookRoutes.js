@@ -3,7 +3,7 @@ import express from "express";
 import BookSchema from "../model/bookSchema.js";
 import authentication from "../middleware/auth.js";
 import uploadFile from "../middleware/multer.js";
-import getDataUrl from "../utils/DataUri.js";
+import getDataUrl from "../utils/dataURI.js";
 import cloudServer from "../middleware/cloudinary.js";
 import mongoose from "mongoose";
 

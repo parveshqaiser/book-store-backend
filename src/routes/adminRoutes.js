@@ -41,7 +41,7 @@ router.post("/admin/login", async(req, res)=>{
             token,
        };
 
-        res.cookie("token", token,{httpOnly:true,sameSite:"strict", maxAge: 60 * 60 * 2000});
+        res.cookie("accessToken", token,{httpOnly:true,sameSite:"strict", maxAge: 60 * 60 * 2000});
         res.status(200).json({message : `Admin Login Success`, success: true, data});
 
     } catch (error) {
@@ -53,7 +53,7 @@ router.post("/admin/login", async(req, res)=>{
 router.post("/admin/logout", (req, res)=>{
 
     try {
-        res.cookie("token","", {expires : new Date()}).status(200).json({message : "Admin Logout Success", success : true})
+        res.cookie("accessToken","", {expires : new Date()}).status(200).json({message : "Admin Logout Success", success : true})
     } catch (error) {
         console.log("some error in admin logging out", error);
         res.status(500).send("error " + error.message);
