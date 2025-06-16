@@ -12,7 +12,7 @@ import dotenv from "dotenv";
 import parser from "cookie-parser";
 
 const app = express();
-
+dotenv.config();
 app.use(express.json());
 app.use(parser());
 
@@ -20,8 +20,6 @@ app.use(cors({
     origin : "http://localhost:5173",
     credentials : true,
 }));
-
-dotenv.config();
 
 app.use("/", authRoutes);
 app.use("/", bookRoutes);

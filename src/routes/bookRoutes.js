@@ -4,7 +4,7 @@ import BookSchema from "../model/bookSchema.js";
 import authentication from "../middleware/auth.js";
 import uploadFile from "../middleware/multer.js";
 import getDataUrl from "../utils/dataURI.js";
-import cloudServer from "../middleware/cloudinary.js";
+import cloudinary from "../middleware/cloudinary.js";
 import mongoose from "mongoose";
 
 const router = express.Router();
@@ -21,12 +21,12 @@ router.post("/addBook",authentication, uploadFile.single("coverPic") , async(req
         {
             let bufferUrl = getDataUrl(file);
             try {
-                cloudUrl = await cloudServer.uploader.upload(bufferUrl)
+                cloudUrl = await cloudinary.uploader.upload(bufferUrl)
             } catch (error) {
                 console.log("inner error ", error);
             }
         }
-
+        
         let bookDetails = await BookSchema.create({
             title,
             author,
