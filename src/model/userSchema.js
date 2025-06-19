@@ -63,12 +63,10 @@ const userModel = new mongoose.Schema({
     },
     accessToken : {
         type : String,
-        required : true,
         default:null,
     },
     refreshToken : {
         type : String,
-        required : true,
         default:null,
     },
     address : [addressSchema]
