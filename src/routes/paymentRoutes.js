@@ -3,10 +3,9 @@ import express from "express";
 import instance from "../service/razorpay.js";
 import authentication from "../middleware/auth.js";
 import PaymentSchema from "../model/paymentSchema.js";
-const router = express.Router();
-
 import {validateWebhookSignature} from 'razorpay/dist/utils/razorpay-utils.js';
-
+import bodyParser from "body-parser";
+const router = express.Router();
 
 router.post("/create/paymnent",authentication,async(req, res)=>{
 
@@ -48,7 +47,7 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
     }
 });
 
-router.post("/pay/webhook",async (req, res)=>{
+router.post("/pay/webhook", bodyParser.raw({ type: "application/json" }),async (req, res)=>{
 
     try {
 
@@ -66,7 +65,9 @@ router.post("/pay/webhook",async (req, res)=>{
             return res.status(400).json({message : "Web Hook Not valid ", success : false});
         }
 
-        let {status, order_id} = req.body.payload.payment.entity;
+        let payload = JSON.parse(req.body);  // manually parse the raw buffer
+
+        let { status, order_id } = payload.payload.payment.entity;
 
         let payDetails = await PaymentSchema.findOne({_id :order_id});
 
