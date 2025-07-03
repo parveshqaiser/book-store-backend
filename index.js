@@ -8,6 +8,7 @@ import userRoutes from "./src/routes/userRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
+import paymentRoutes from "./src/routes/paymentRoutes.js";
 import dotenv from "dotenv";
 import parser from "cookie-parser";
 
@@ -27,6 +28,7 @@ app.use("/", userRoutes);
 app.use("/", adminRoutes);
 app.use("/", orderRoutes);
 app.use("/", dashboardRoutes);
+app.use("/", paymentRoutes);
 
 app.get("/", (req, res)=>{
     res.status(200).json({message : "Hello from book store"})
