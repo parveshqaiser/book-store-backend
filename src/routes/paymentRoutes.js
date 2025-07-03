@@ -51,7 +51,7 @@ router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
 
     try {
 
-        let webhookSignature = req.get("x-razorpay-signature");
+        let webhookSignature = req.get("X-Razorpay-Signature");
         console.log("BODY TYPE:", typeof req.body);
         console.log("RAW BODY:", req.body);
         console.log("SIGNATURE:", webhookSignature);
