@@ -55,7 +55,7 @@ router.post("/pay/webhook",async (req, res)=>{
         let webhookSignature = req.get("x-razorpay-signature");
 
         let isWebHookValid =  await validateWebhookSignature(
-            JSON.stringify(req.body),
+            req.body,
             webhookSignature,
             process.env.RAZORPAY_WWEBHOOK_SECRET_KEY
         );
