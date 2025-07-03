@@ -3,7 +3,7 @@ import express from "express";
 import instance from "../service/razorpay.js";
 import authentication from "../middleware/auth.js";
 import PaymentSchema from "../model/paymentSchema.js";
-import {validateWebhookSignature} from 'razorpay/dist/utils/razorpay-utils.js';
+import { validateWebhookSignature } from "razorpay/dist/utils/razorpay-utils.js";
 import bodyParser from "body-parser";
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
 
         let createOrder = await instance.orders.create({
             amount: amount * 100,  // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-            currency: "USD",
+            currency: "INR",
             receipt: "#recepit1",
             notes : {
                 name : name,
@@ -47,16 +47,20 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
     }
 });
 
-router.post("/pay/webhook", bodyParser.raw({ type: "application/json" }),async (req, res)=>{
+router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
 
     try {
 
         let webhookSignature = req.get("x-razorpay-signature");
+        console.log("BODY TYPE:", typeof req.body);
+        console.log("RAW BODY:", req.body);
+        console.log("SIGNATURE:", webhookSignature);
+        console.log("SECRET:", process.env.RAZORPAY_WEBHOOK_SECRET_KEY);
 
         let isWebHookValid =  await validateWebhookSignature(
             req.body,
             webhookSignature,
-            process.env.RAZORPAY_WWEBHOOK_SECRET_KEY
+            process.env.RAZORPAY_WEBHOOK_SECRET_KEY
         );
 
         console.log("*************** ", isWebHookValid);
