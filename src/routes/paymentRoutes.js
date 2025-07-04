@@ -50,20 +50,17 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
 router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
 
     try {
-
-        let webhookSignature = req.get("X-Razorpay-Signature");
+        let webhookSignature = req.headers("X-Razorpay-Signature");
         console.log("BODY TYPE:", typeof req.body);
         console.log("RAW BODY:", req.body);
-        console.log("SIGNATURE:", webhookSignature);
+        console.log("SIGNATURE:", webhookSignature);  // getting undefined
         console.log("SECRET:", process.env.RAZORPAY_WEBHOOK_SECRET_KEY);
 
-        let isWebHookValid =  await validateWebhookSignature(
+        let isWebHookValid =  validateWebhookSignature(
             req.body,
             webhookSignature,
             process.env.RAZORPAY_WEBHOOK_SECRET_KEY
         );
-
-        console.log("*************** ", isWebHookValid);
 
         if(isWebHookValid == false){
             return res.status(400).json({message : "Web Hook Not valid ", success : false});
@@ -77,9 +74,7 @@ router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
 
         payDetails.status = status;
         await payDetails.save();
-
         // if(req.body.paymnent == "captured"){}
-
         // if(req.body.paymnent == "failed") {}
 
         res.status(200).json({message : "Web Hook Received Successfully" , success : true});
