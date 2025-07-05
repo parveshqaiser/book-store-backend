@@ -47,7 +47,7 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
     }
 });
 
-router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
+router.post("/pay/webhook", bodyParser.raw({ type: "application/json*" }),async (req, res)=>{
 
     try {
 
