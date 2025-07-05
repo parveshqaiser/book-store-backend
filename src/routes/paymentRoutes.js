@@ -50,14 +50,14 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
 router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
 
     try {
-        let webhookSignature = req.headers("X-Razorpay-Signature");
+        let webhookSignature = req.headers["x-razorpay-signature"];
         console.log("BODY TYPE:", typeof req.body);
         console.log("RAW BODY:", req.body);
         console.log("SIGNATURE:", webhookSignature);  // getting undefined
         console.log("SECRET:", process.env.RAZORPAY_WEBHOOK_SECRET_KEY);
 
         let isWebHookValid =  validateWebhookSignature(
-            req.body,
+            req.body.toString('utf8'),
             webhookSignature,
             process.env.RAZORPAY_WEBHOOK_SECRET_KEY
         );
