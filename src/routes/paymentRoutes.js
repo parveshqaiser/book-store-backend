@@ -51,10 +51,6 @@ router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
 
     try {
         let webhookSignature = req.headers["x-razorpay-signature"];
-        console.log("BODY TYPE:", typeof req.body);
-        console.log("RAW BODY:", req.body);
-        console.log("SIGNATURE:", webhookSignature);  // getting undefined
-        console.log("SECRET:", process.env.RAZORPAY_WEBHOOK_SECRET_KEY);
 
         let isWebHookValid =  validateWebhookSignature(
             req.body.toString('utf8'),
@@ -68,12 +64,19 @@ router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
 
         let payload = JSON.parse(req.body);  // manually parse the raw buffer
 
+        console.log("*** payload ", payload);
+
         let { status, order_id } = payload.payload.payment.entity;
+
+        console.log("******** ", status, order_id);
 
         let payDetails = await PaymentSchema.findOne({_id :order_id});
 
+        console.log("****pay deta before  ", payDetails);
+
         payDetails.status = status;
         await payDetails.save();
+        console.log("****pay deta  after ", payDetails);
         // if(req.body.paymnent == "captured"){}
         // if(req.body.paymnent == "failed") {}
 
@@ -82,6 +85,6 @@ router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
         console.log("web hook error ", error);
         res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
-})
+});
 
 export default router;
