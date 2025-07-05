@@ -50,6 +50,8 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
 router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
 
     try {
+
+        console.log("going inside this web hook")
         let webhookSignature = req.headers["x-razorpay-signature"];
 
         let isWebHookValid =  validateWebhookSignature(
@@ -62,7 +64,7 @@ router.post("/pay/webhook", bodyParser.raw({ type: "*/*" }),async (req, res)=>{
             return res.status(400).json({message : "Web Hook Not valid ", success : false});
         }
 
-        let payload = JSON.parse(req.body);  // manually parse the raw buffer
+       const payload = JSON.parse(req.body.toString('utf8'));  // manually parse the raw buffer
 
         console.log("*** payload ", payload);
 
