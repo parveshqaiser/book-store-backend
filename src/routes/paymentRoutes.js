@@ -47,45 +47,49 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
     }
 });
 
-router.post("/pay/webhook", bodyParser.raw({ type: "application/json*" }),async (req, res)=>{
-
+router.post("/pay/webhook", bodyParser.raw({ type: "application/json" }), async (req, res) => {
     try {
+        console.log("Webhook called. Raw body (buffer):", req.body); // Debug: Log raw buffer
 
-        console.log("going inside this web hook")
-        let webhookSignature = req.headers["x-razorpay-signature"];
+        const webhookSignature = req.headers["x-razorpay-signature"];
+        console.log("Webhook signature:", webhookSignature); // Debug: Log signature
 
-        let isWebHookValid =  validateWebhookSignature(
-            req.body.toString('utf8'),
+        const rawBody = req.body.toString('utf8');
+        console.log("Raw body (string):", rawBody); // Debug: Log string body
+
+        const isWebHookValid = validateWebhookSignature(
+            rawBody,
             webhookSignature,
             process.env.RAZORPAY_WEBHOOK_SECRET_KEY
         );
+        console.log("Webhook validation result:", isWebHookValid); // Debug: Log validation
 
-        if(isWebHookValid == false){
-            return res.status(400).json({message : "Web Hook Not valid ", success : false});
+        if (!isWebHookValid) {
+        return res.status(400).json({ message: "Invalid webhook signature", success: false });
         }
 
-       const payload = JSON.parse(req.body.toString('utf8'));  // manually parse the raw buffer
+        const payload = JSON.parse(rawBody);
+        console.log("Parsed payload:", payload); // Debug: Log full payload
 
-        console.log("*** payload ", payload);
+        // Correct path: payload.payment.entity (not payload.payload.payment.entity)
+        const { status, order_id } = payload.payment.entity;
+        console.log("Extracted status:", status, "order_id:", order_id); // Debug
 
-        let { status, order_id } = payload.payload.payment.entity;
+        const payDetails = await PaymentSchema.findOne({ _id: order_id }).exec();
+        console.log("Payment details before update:", payDetails); // Debug
 
-        console.log("******** ", status, order_id);
-
-        let payDetails = await PaymentSchema.findOne({_id :order_id});
-
-        console.log("****pay deta before  ", payDetails);
+        if (!payDetails) {
+        return res.status(404).json({ message: "Payment not found", success: false });
+        }
 
         payDetails.status = status;
         await payDetails.save();
-        console.log("****pay deta  after ", payDetails);
-        // if(req.body.paymnent == "captured"){}
-        // if(req.body.paymnent == "failed") {}
+        console.log("Payment details after update:", payDetails); // Debug
 
-        res.status(200).json({message : "Web Hook Received Successfully" , success : true});
+        res.status(200).json({ message: "Webhook processed", success: true });
     } catch (error) {
-        console.log("web hook error ", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        console.error("Webhook error:", error); // Debug: Log full error
+        res.status(500).json({ message: "Server error", error: error.message, success: false });
     }
 });
 
