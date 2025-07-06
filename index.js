@@ -9,12 +9,15 @@ import adminRoutes from "./src/routes/adminRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
+import webHookRoutes from "./src/routes/webhookRoutes.js";
+
 import dotenv from "dotenv";
 import parser from "cookie-parser";
 
 const app = express();
 dotenv.config();
-// app.use(express.json());
+app.use("/", webHookRoutes);
+app.use(express.json());
 app.use(parser());
 
 app.use(cors({
