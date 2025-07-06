@@ -49,17 +49,16 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
 
 router.post("/pay/webhook", async (req, res) => {
     try {
-        console.log("Webhook called. Raw body (buffer):", req.body); // Debug: Log raw buffer
 
         const webhookSignature = req.headers["x-razorpay-signature"];
         console.log("Webhook signature:", webhookSignature); // Debug: Log signature
 
-        const rawBody = req.body.toString('utf8');
-        console.log("Raw body + ", rawBody); // Debug: Log string body
-        console.log("re.body  ", req.body);
+        // const rawBody = req.body.toString('utf8');
+        // console.log("Raw body + ", rawBody); // Debug: Log string body
+        // console.log("re.body  ", req.body);
 
         const isWebHookValid = validateWebhookSignature(
-            rawBody,
+            req.body,
             webhookSignature,
             process.env.RAZORPAY_WEBHOOK_SECRET_KEY
         );
@@ -69,11 +68,8 @@ router.post("/pay/webhook", async (req, res) => {
             return res.status(400).json({ message: "Invalid webhook signature", success: false });
         }
 
-        const payload = JSON.parse(rawBody);
-        console.log("Parsed payload:", payload); // Debug: Log full payload
-
         // Correct path: payload.payment.entity (not payload.payload.payment.entity)
-        const { status, order_id } = payload.payment.entity;
+        const { status, order_id } = req.body.payload.payment.entity;
         console.log("Extracted status:", status, "order_id:", order_id); // Debug
 
         const payDetails = await PaymentSchema.findOne({ _id: order_id }).exec();
