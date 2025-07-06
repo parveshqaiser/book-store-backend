@@ -14,7 +14,7 @@ import parser from "cookie-parser";
 
 const app = express();
 dotenv.config();
-app.use(express.json());
+// app.use(express.json());
 app.use(parser());
 
 app.use(cors({
