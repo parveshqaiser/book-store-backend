@@ -47,7 +47,7 @@ router.post("/create/paymnent",authentication,async(req, res)=>{
     }
 });
 
-router.post("/pay/webhook", bodyParser.raw({ type: "application/json" }), async (req, res) => {
+router.post("/pay/webhook", async (req, res) => {
     try {
         console.log("Webhook called. Raw body (buffer):", req.body); // Debug: Log raw buffer
 
@@ -55,7 +55,8 @@ router.post("/pay/webhook", bodyParser.raw({ type: "application/json" }), async 
         console.log("Webhook signature:", webhookSignature); // Debug: Log signature
 
         const rawBody = req.body.toString('utf8');
-        console.log("Raw body (string):", rawBody); // Debug: Log string body
+        console.log("Raw body + ", rawBody); // Debug: Log string body
+        console.log("re.body  ", req.body);
 
         const isWebHookValid = validateWebhookSignature(
             rawBody,
@@ -65,7 +66,7 @@ router.post("/pay/webhook", bodyParser.raw({ type: "application/json" }), async 
         console.log("Webhook validation result:", isWebHookValid); // Debug: Log validation
 
         if (!isWebHookValid) {
-        return res.status(400).json({ message: "Invalid webhook signature", success: false });
+            return res.status(400).json({ message: "Invalid webhook signature", success: false });
         }
 
         const payload = JSON.parse(rawBody);
@@ -79,7 +80,7 @@ router.post("/pay/webhook", bodyParser.raw({ type: "application/json" }), async 
         console.log("Payment details before update:", payDetails); // Debug
 
         if (!payDetails) {
-        return res.status(404).json({ message: "Payment not found", success: false });
+            return res.status(404).json({ message: "Payment not found", success: false });
         }
 
         payDetails.status = status;
