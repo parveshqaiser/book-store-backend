@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post("/new/webhook", bodyParser.raw({type: 'application/json'}), async (req, res) => {
     try {
-        const receivedSignature = req.headers["X-Razorpay-Signature"];
+        const receivedSignature = req.headers["x-razorpay-signature"];
         const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET_KEY.trim();
         const payload = req.body.toString();
 
