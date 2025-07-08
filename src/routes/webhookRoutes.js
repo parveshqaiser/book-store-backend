@@ -11,11 +11,14 @@ router.post("/pay/webhook", bodyParser.raw({type: 'application/json'}), async (r
     try {
         const receivedSignature = req.headers["x-razorpay-signature"];
         const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET_KEY;
-
-        // Use the raw body for verification
         const payload = req.body.toString();
+
+        console.log("**receivedSignature ",receivedSignature);
+        console.log("webhookSecret ", webhookSecret);
+        console.log("payload ", payload);
         
         const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(payload).digest("hex");
+        console.log("expectedSignature     ", expectedSignature)
 
         if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(receivedSignature))) {
             console.error("Invalid webhook signature");
