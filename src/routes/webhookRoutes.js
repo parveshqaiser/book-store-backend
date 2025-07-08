@@ -5,9 +5,9 @@ import crypto from "crypto";
 import PaymentSchema from "../model/paymentSchema.js";
 
 const router = express.Router();
-
+// http://13.48.59.101/api/new/webhook
 // Use raw body parser for webhook route
-router.post("/pay/webhook", bodyParser.raw({type: 'application/json'}), async (req, res) => {
+router.post("/new/webhook", bodyParser.raw({type: 'application/json'}), async (req, res) => {
     try {
         const receivedSignature = req.headers["x-razorpay-signature"];
         const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET_KEY.trim();
@@ -25,9 +25,6 @@ router.post("/pay/webhook", bodyParser.raw({type: 'application/json'}), async (r
             return res.status(400).json({message: "Invalid signature", success: false});
         }
 
-        console.log("Webhook signature verified successfully");
-        
-        // Now parse the JSON body
         const event = JSON.parse(payload);
         console.log("Webhook payload:", event);
 
