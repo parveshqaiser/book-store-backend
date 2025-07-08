@@ -3,7 +3,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import crypto from "crypto";
 import PaymentSchema from "../model/paymentSchema.js";
-import {validateWebhookSignature}  from 'razorpay/dist/utils/razorpay-utils';
+import {validateWebhookSignature}  from 'razorpay/dist/utils/razorpay-utils.js';
 
 const router = express.Router();
 
