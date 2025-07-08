@@ -3,13 +3,13 @@ import express from "express";
 import bodyParser from "body-parser";
 import crypto from "crypto";
 import PaymentSchema from "../model/paymentSchema.js";
+import {validateWebhookSignature}  from 'razorpay/dist/utils/razorpay-utils';
 
 const router = express.Router();
-// http://13.48.59.101/api/new/webhook
-// Use raw body parser for webhook route
+
 router.post("/new/webhook", bodyParser.raw({type: 'application/json'}), async (req, res) => {
     try {
-        const receivedSignature = req.headers["x-razorpay-signature"];
+        const receivedSignature = req.headers["X-Razorpay-Signature"];
         const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET_KEY.trim();
         const payload = req.body.toString();
 
@@ -17,10 +17,18 @@ router.post("/new/webhook", bodyParser.raw({type: 'application/json'}), async (r
         console.log("webhookSecret ", webhookSecret);
         console.log("payload ", payload);
         
-        const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(payload).digest("hex");
-        console.log("expectedSignature     ", expectedSignature)
+        // const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(payload).digest("hex");
+        // console.log("expectedSignature     ", expectedSignature)
 
-        if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(receivedSignature))) {
+        // if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(receivedSignature))) {
+        //     console.error("Invalid webhook signature");
+        //     return res.status(400).json({message: "Invalid signature", success: false});
+        // }
+
+        let checkValidity = validateWebhookSignature(JSON.stringify(req.body), receivedSignature, webhookSecret);
+
+        console.log("checkValidity   ", checkValidity);
+        if(!checkValidity){
             console.error("Invalid webhook signature");
             return res.status(400).json({message: "Invalid signature", success: false});
         }
