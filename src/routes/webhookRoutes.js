@@ -12,13 +12,13 @@ const router = express.Router();
 router.post("/pay/webhook", async (req, res) => {
 
     try {
-        const webhookSignature = req.headers["x-razorpay-signature"];
-
+        const receivedSignature = req.headers["x-razorpay-signature"];
+        const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET_KEY;
         const payload = JSON.stringify(req.body);
 
-        let expectedSignature = crypto.createHmac("sha256", webhookSignature).update(payload).digest("hex");
+        let expectedSignature = crypto.createHmac("sha256", webhookSecret).update(payload).digest("hex");
 
-        if (crypto.timingSafeEqual(Buffer.from(expectedSignature),Buffer.from(webhookSignature))) 
+        if (crypto.timingSafeEqual(Buffer.from(expectedSignature),Buffer.from(receivedSignature))) 
         {
             console.log("Webhook signature verified successfully");
             console.log("Recieved Signature: " + receivedSignature);
