@@ -7,7 +7,7 @@ import {validateWebhookSignature}  from 'razorpay/dist/utils/razorpay-utils.js';
 
 const router = express.Router();
 
-router.post("/new/webhook", bodyParser.raw({type: 'application/json'}), async (req, res) => {
+router.post("/new/webhook",async (req, res) => {
     try {
         const receivedSignature = req.headers["x-razorpay-signature"];
         const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET_KEY.trim();
@@ -16,6 +16,7 @@ router.post("/new/webhook", bodyParser.raw({type: 'application/json'}), async (r
         console.log("**receivedSignature ",receivedSignature);
         console.log("webhookSecret ", webhookSecret);
         console.log("payload ", payload);
+        console.log("re.body ", req.body);
         
         // const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(payload).digest("hex");
         // console.log("expectedSignature     ", expectedSignature)
