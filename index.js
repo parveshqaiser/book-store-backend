@@ -16,7 +16,7 @@ import parser from "cookie-parser";
 
 const app = express();
 dotenv.config();
-app.use("/", webHookRoutes);
+// app.use("/", webHookRoutes);
 app.use(express.json());
 app.use(parser());
 
