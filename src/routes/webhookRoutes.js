@@ -28,7 +28,7 @@ router.post("/new/webhook",async (req, res) => {
 
         let checkValidity = validateWebhookSignature(JSON.stringify(req.body), receivedSignature, webhookSecret);
 
-        console.log("checkValidity   ", checkValidity);
+        console.log("checkValidity  ", checkValidity);
         if(!checkValidity){
             console.error("Invalid webhook signature");
             return res.status(400).json({message: "Invalid signature", success: false});

@@ -12,7 +12,7 @@ let paymentModel = new mongoose.Schema({
         required : true,
     },
     status : {
-        type : String,
+        type : String, // created, captured , failed
         required : true,
     },
     paymentId : {
