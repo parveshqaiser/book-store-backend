@@ -6,6 +6,10 @@ const addressSchema = new mongoose.Schema({
     area : {
         type : String,
     },
+    addressType : {
+        type : String,
+        enum : ["Home", "Apartment", "Work", "Others"],
+    },
     doorNo : {
         type : String,
         required : true,

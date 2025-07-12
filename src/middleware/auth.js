@@ -5,7 +5,7 @@ const authentication = (req, res,next)=>{
 
     try {
         let getCookie = req.cookies?.accessToken;
-        
+
         if(!getCookie)
         {
             res.status(401).json({message: "Unauthorized User", status : 401});
