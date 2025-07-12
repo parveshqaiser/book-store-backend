@@ -4,6 +4,7 @@ import UserSchema from "../model/userSchema.js";
 import bcrypt from "bcrypt";
 import validator from "validator";
 import authentication from "../middleware/auth.js";
+import OrderSchema from "../model/orderSchema..js";
 
 const router = express.Router();
 
@@ -144,7 +145,6 @@ router.put("/update/address/:index", authentication, async(req, res)=>{
         });
         
         await user.save();
-
         res.status(200).json({message : "Address Updated Successfully", success: true});
 
     } catch (error) {
@@ -176,7 +176,146 @@ router.delete("/delete/address/:index", authentication, async(req, res)=>{
         console.log("err", error);
         res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
-})
+});
+
+// for user profile overview  
+
+router.get("/get/totaluser/orders",authentication, async(req, res)=>{
+    try {
+        let id = req.id;
+        let user = await UserSchema.findOne({_id:id});
+
+        if(!user){
+            return res.status(404).json({message : "Invalid User", success : false})
+        }
+
+        let query = [{
+                $match: {
+                    email : user.email
+                }
+            },
+            {
+                $count: "totalOrders"
+        }];
+
+        let result = await OrderSchema.aggregate(query);
+        let totalOrders = result[0]?.totalOrders || 0;
+
+        res.status(200).json({message : "Data Fetched", data : totalOrders, success : true});
+
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+});
+
+router.get("/get/total/address", authentication, async(req, res)=>{
+    try {
+        let id = req.id;
+        let user = await UserSchema.findOne({_id:id});
+
+        if(!user){
+            return res.status(404).json({message : "Invalid User", success : false})
+        }
+
+        let query = [
+        {
+            $match: {
+            email : user.email,
+            }
+        },
+        {
+            $unwind: {
+            path : "$address"
+            }
+        },
+        {
+            $group: {
+                _id: "$_id",
+                totalAddress : {
+                    $sum :1
+                }
+            }
+        }];
+
+        let result = await UserSchema.aggregate(query);
+        let totalAdd = result[0]?.totalAddress || 0;
+
+        res.status(200).json({message : "Data Fetched", data : totalAdd, success : true});
+
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+});
+
+router.get("/get/total/amountspent", authentication, async(req, res)=>{
+    try {
+        let id = req.id;
+        let user = await UserSchema.findOne({_id:id});
+
+        if(!user){
+            return res.status(404).json({message : "Invalid User", success : false})
+        }
+
+        let query = [{
+            $match: {
+                email : user.email
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalAmountSpent : {
+                    $sum : "$totalPrice"
+                }
+            }
+        }];
+
+        let result = await OrderSchema.aggregate(query);
+        let totalAmount = result[0]?.totalAmountSpent || 0;
+
+        res.status(200).json({message : "Data Fetched", data : totalAmount, success : true});
+
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+});
+
+router.get("/get/lastorder/date", authentication, async(req, res)=>{
+    try {
+        let id = req.id;
+        let user = await UserSchema.findOne({_id:id});
+
+        if(!user){
+            return res.status(404).json({message : "Invalid User", success : false})
+        }
+
+        let query = [
+            { 
+                $match: { 
+                    email: user.email 
+                }
+            },
+            { 
+                $group: {
+                    _id: null, 
+                    latestDate: { 
+                        $max: "$createdAt" 
+                    } 
+                } 
+            }];
+
+        let result = await OrderSchema.aggregate(query);
+        let lastOrder = result[0]?.latestDate || "";
+        res.status(200).json({message : "Data Fetched", data : lastOrder, success : true});
+
+    } catch (error) {
+        console.log("err", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+});
 
 export default router;
 

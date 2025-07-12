@@ -179,7 +179,7 @@ router.post("/user/login", async(req, res)=>{
             return;
         }
 
-        let accessToken = jwt.sign({id: user._id}, process.env.SECRET_KEY,{expiresIn:"15min"});
+        let accessToken = jwt.sign({id: user._id}, process.env.SECRET_KEY,{expiresIn:"1hr"});
         let refreshToken = jwt.sign({id: user._id}, process.env.SECRET_KEY,{expiresIn:"7days"});
 
         user.accessToken = accessToken;

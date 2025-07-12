@@ -204,8 +204,6 @@ router.get("/user/orders/pending",authentication, async(req, res)=>{
 		];
 
 		let userOrders = await OrderSchema.aggregate(query);
-
-
 		res.status(200).json({message :`${userOrders.length ==0}` ? "No Pending Orders" : "Orders Fetched",data :userOrders, success : true});
 	} catch (error) {
 		console.log("err ", error);
