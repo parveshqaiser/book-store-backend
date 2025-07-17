@@ -239,4 +239,98 @@ router.post("/verify-refresh-token", authentication,async(req, res)=>{
     }
 });
 
+// forget passowrd, send email
+
+router.post("/forgot/password", async(req, res)=>{
+    try {
+        let {email} = req.body;
+
+        let findUser = await UserSchema.findOne({email : email});
+
+        if(!findUser){
+            res.status(400).json({message: "Account Doesn't Exist", success : false});
+            return;
+        }
+
+        let otp = Math.floor(100000 + Math.random() * 900000);
+        let otpExpiry = Date.now() + 3 * 60 * 1000;
+
+        findUser.otp = otp;
+        findUser.otpExpiry = otpExpiry;
+        await findUser.save();
+
+        let mailOptions = {
+            from: "ramganta778@gmail.com",
+            to: email,
+            subject: "Password recovery",
+            html: `
+                <p>Someone is attempting to reset the password of your account.</p>
+                <p>Your OTP for reseting password is <strong> ${otp} </strong>. It will expire in 3 minutes.</p>
+                <p>Regards,<br>Team The Story Book Store </p>
+            `,
+        };
+
+        let emailInfo = await transporter.sendMail(mailOptions);
+
+        res.status(201).json({message :"OTP Sent Successfully", success : true});
+
+
+    } catch (error) {
+        console.log("some error", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+});
+
+router.post("/verify/password/otp", async(req, res)=>{
+    try {
+         let {email,otp} = req.body;
+
+        let user = await UserSchema.findOne({email}).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: "User Not Found", success: false });
+        }
+
+        if (user.otpExpiry < Date.now()) {
+            return res.status(410).json({ message: "OTP Expired", success: false });
+        }
+
+        if(otp != user.otp)
+        {
+            return res.status(400).json({ message: "Invalid OTP", success: false });
+        }
+
+        // user.otp = parseInt(otp) || 0;
+        res.status(200).json({message : "OTP Verified ", success : true});
+
+    } catch (error) {
+        console.log("some error in logging out", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+});
+
+
+router.post("/confirm/reset/password", async(req, res)=>{
+    try {
+        let {newPassword, email} = req.body;
+
+        let user = await UserSchema.findOne({email}).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: "User Not Found", success: false });
+        }
+
+        let hashPassword = await bcrypt.hash(newPassword,10);
+        user.password = hashPassword;
+
+        await user.save();
+
+        res.status(200).json({message : "Passowrd Changed Successfilly", success : true});
+
+    } catch (error) {
+        console.log("some error", error);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+    }
+})
+
+
+
 export default router;
