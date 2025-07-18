@@ -262,11 +262,11 @@ router.post("/forgot/password", async(req, res)=>{
         let mailOptions = {
             from: "ramganta778@gmail.com",
             to: email,
-            subject: "Password recovery",
+            subject: "Reset Your Password",
             html: `
-                <p>Someone is attempting to reset the password of your account.</p>
+                <p>Hey, <b>${findUser.name}</b></p>
                 <p>Your OTP for reseting password is <strong> ${otp} </strong>. It will expire in 3 minutes.</p>
-                <p>Regards,<br>Team The Story Book Store </p>
+                <p>Regards,<br><strong> Team The Story Book Store </strong> </p>
             `,
         };
 
@@ -283,7 +283,7 @@ router.post("/forgot/password", async(req, res)=>{
 
 router.post("/verify/password/otp", async(req, res)=>{
     try {
-         let {email,otp} = req.body;
+        let {email,otp} = req.body;
 
         let user = await UserSchema.findOne({email}).select('-password');
         if (!user) {
