@@ -308,7 +308,6 @@ router.post("/verify/password/otp", async(req, res)=>{
     }
 });
 
-
 router.post("/confirm/reset/password", async(req, res)=>{
     try {
         let {newPassword, email} = req.body;
@@ -329,8 +328,6 @@ router.post("/confirm/reset/password", async(req, res)=>{
         console.log("some error", error);
         res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
-})
-
-
+});
 
 export default router;
