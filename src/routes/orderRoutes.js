@@ -71,6 +71,11 @@ router.get("/admin/orders/pending", authentication, async(req, res)=>{
 				}
 			},
 			{
+				$sort: {
+    				createdAt:-1
+    			},
+			},
+			{
 				$lookup: {
 					from: "books",
 					localField: "product.productId",
@@ -136,6 +141,11 @@ router.get("/admin/orders/delivered", authentication, async(req, res)=>{
 				$match: {
 					orderStatus: "Delivered",
 				}
+			},
+			{
+				$sort: {
+    				createdAt:-1
+    			},
 			},
 			{
 				$lookup: {
