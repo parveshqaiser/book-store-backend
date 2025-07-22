@@ -16,9 +16,10 @@ router.post("/order/book", authentication,async(req,res)=>{
 
 		let book;
 		// below is to modify the qty in book schema
+
 		for(let item of products)
 		{
-			book= await BookSchema.findById({_id : item.productId});
+			book = await BookSchema.findById({_id : item.productId});
 
 			if(!book){
 				return  res.status(400).json({message: "Invalid Book ID", success : false});
@@ -144,7 +145,7 @@ router.get("/admin/orders/delivered", authentication, async(req, res)=>{
 			},
 			{
 				$sort: {
-    				createdAt:-1
+    				updatedAt:-1
     			},
 			},
 			{
@@ -195,6 +196,11 @@ router.get("/user/orders/pending",authentication, async(req, res)=>{
 				}
 			},
 			{
+				$sort: {
+    				createdAt:-1
+    			},
+			},
+			{
 				$lookup: {
 					from: "books",
 					localField: "product.productId",
@@ -232,6 +238,11 @@ router.get("/user/orders/delivered",authentication, async(req, res)=>{
 					email: user.email,
 					orderStatus : "Delivered",
 				}
+			},
+			{
+				$sort: {
+    				createdAt:-1
+    			},
 			},
 			{
 				$lookup: {
