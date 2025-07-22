@@ -46,7 +46,7 @@ router.post("/admin/login", async(req, res)=>{
 
     } catch (error) {
         console.log("some error in logging admin", error);
-        res.status(500).send("error " + error.message);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
@@ -56,7 +56,7 @@ router.post("/admin/logout", (req, res)=>{
         res.cookie("accessToken","", {expires : new Date()}).status(200).json({message : "Admin Logout Success", success : true})
     } catch (error) {
         console.log("some error in admin logging out", error);
-        res.status(500).send("error " + error.message);
+        res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
 
