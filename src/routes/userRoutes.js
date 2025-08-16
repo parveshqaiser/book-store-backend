@@ -178,7 +178,7 @@ router.delete("/delete/address/:index", authentication, async(req, res)=>{
     }
 });
 
-// for user profile overview  
+// for user profile overview in admin dash
 
 router.get("/get/totaluser/orders",authentication, async(req, res)=>{
     try {

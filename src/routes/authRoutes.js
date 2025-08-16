@@ -98,7 +98,7 @@ router.post("/verify/otp", async(req, res)=>{
         user.isUserVerified = true;
         await user.save();
 
-        res.cookie("token", token);
+        res.cookie("token", token,{sameSite: "strict", httpOnly:true, secure:true});
         res.status(200).json({message : "User Verified Successfully", data : user, success : true})
 
     } catch (error) {
@@ -156,13 +156,11 @@ router.post("/user/login", async(req, res)=>{
 
         if(!validator.isEmail(email))
         {
-            res.status(400).json({message : "Invalid Email", success : false});
-            return;
+            return res.status(400).json({message : "Invalid Email", success : false});            
         }
 
         if(!password || (password && password.trim()== "")){
-            res.status(400).json({message: "Password Required"});
-            return;
+            return res.status(400).json({message: "Password Required"});           
         }
 
         let user = await UserSchema.findOne({email});
@@ -187,10 +185,23 @@ router.post("/user/login", async(req, res)=>{
 
         await user.save();
 
-        res.cookie("accessToken", accessToken, {sameSite:true})
-        .cookie("refreshToken", refreshToken, {sameSite:true});
-        
-        res.status(200).json({message : `Welcome ${user.name}`, success: true , token : {refreshToken,accessToken}});
+        res.cookie("accessToken", 
+            accessToken, {
+                sameSite: "strict", 
+                httpOnly:true, 
+                secure:true
+            })
+            .cookie("refreshToken", refreshToken, {
+                sameSite: "strict", 
+                httpOnly:true, 
+                secure:true
+            })
+            .status(200)
+            .json({
+                message :`Welcome ${user.name}`, 
+                success: true , 
+                token : {refreshToken,accessToken}
+            });
 
     } catch (error) {
         console.log("some error in logging in", error);
@@ -230,7 +241,7 @@ router.post("/verify-refresh-token", authentication,async(req, res)=>{
         user.accessToken = newAccessToken;
         await user.save();
 
-        res.cookie("accessToken", newAccessToken, {sameSite:true})
+        res.cookie("accessToken", newAccessToken, {sameSite:"strict", httpOnly:true})
         .status(200).json({message : "New Access Token Generated", success:true , newAccessToken});
 
     } catch (error) {
