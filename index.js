@@ -37,6 +37,10 @@ app.get("/", (req, res)=>{
     res.status(200).json({message : "Hello from book store"})
 });
 
+app.get("/test", (req, res)=>{
+    res.status(200).json({message : "Hello from book store : just testing api routes", success : true})
+});
+
 dbConnection().then(()=>{
     console.log("DB connected");
 

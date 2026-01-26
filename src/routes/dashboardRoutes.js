@@ -185,7 +185,13 @@ router.get("/revenue/monthly/wise", authentication, async(req, res)=>{
                 totalSales :1,
                 totalOrders :1      
             }
-        }];
+        },
+        {
+            $sort: {
+                "yearDetails.month" :1
+            }
+        }
+    ];
 
 
         let monthlySales = await OrderSchema.aggregate(query);
