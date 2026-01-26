@@ -9,6 +9,7 @@ import adminRoutes from "./src/routes/adminRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
+import messageRoutes from "./src/routes/messageRoutes.js";
 import webHookRoutes from "./src/routes/webhookRoutes.js";
 
 import dotenv from "dotenv";
@@ -32,6 +33,7 @@ app.use("/", adminRoutes);
 app.use("/", orderRoutes);
 app.use("/", dashboardRoutes);
 app.use("/", paymentRoutes);
+app.use("/", messageRoutes);
 
 app.get("/", (req, res)=>{
     res.status(200).json({message : "Hello from book store"})
