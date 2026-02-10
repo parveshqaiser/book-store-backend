@@ -36,8 +36,7 @@ router.post("/contact/message", async(req, res)=>{
             name,email,message
         });
 
-
-        return res.status(200).json({data : req.body, message : "Message Sent Successfully", success : true});
+        return res.status(200).json({ message : "Message Sent Successfully. Admin will respond you after a while.", success : true});
 
     } catch (error) {
         console.log("some error in ordering book", error);
