@@ -209,9 +209,19 @@ router.post("/user/login", async(req, res)=>{
     }
 });
 
-router.post("/user/logout", (req, res)=>{
+router.post("/user/logout",authentication,async(req, res)=>{
 
     try {
+
+        let id = req?.id;
+
+        let user = await UserSchema.findByIdAndUpdate(id, {$set : {refreshToken:"", accessToken:""}}).select("-password");
+
+        if(!user){
+            res.status(400).json({message: "User Does't Exsit", success : false});
+            return;
+        }
+
         res.status(200)
         .cookie("accessToken","", {expires : new Date()})
         .cookie("refreshToken","", {expires : new Date()})
@@ -249,6 +259,7 @@ router.post("/verify-refresh-token", authentication,async(req, res)=>{
         res.status(500).json({ message: "Server Error", error: error.message, success: false });
     }
 });
+
 
 // forget passowrd, send email
 
