@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 import transporter from "../service/nodeMailer.js";
 import authentication from "../middleware/auth.js";
+import { generateEmailContent, resentOtpToVerifyAccount } from "../service/emailTemplate.js";
 
 const router = express.Router();
 
@@ -19,26 +20,34 @@ router.post("/register/user", async(req, res)=>{
             return;
         }
 
-        let userExist = await UserSchema.findOne({email, isUserVerified:true});
-        if(userExist){
+        let user = await UserSchema.findOne({email}).select("-password");
+        if(user && user.isUserVerified){
             return res.status(400).json({message : "User Already Exist with this Email", success : false});
         }
-        
-        let verifyUser = await UserSchema.findOne({email, isUserVerified : false});
 
         let hashPassword = await bcrypt.hash(password,10);
         let otp = Math.floor(100000 + Math.random() * 900000);
-        let otpExpiry = Date.now() + 2 * 60 * 1000; 
+        let otpExpiry = Date.now() + 2 * 60 * 1000;  // 2mins
 
         let createUser;
 
-        if(verifyUser)
+        if(user && !user.isUserVerified && user.otpExpiry > Date.now())
         {
-            verifyUser.otp= otp,
-            verifyUser.otpExpiry= otpExpiry,  
-            await verifyUser.save();          
+            return res.status(400).json({
+                message : "OTP already sent. Please wait",
+                success : false
+            });
+        }
+
+        if(user && user.isUserVerified == false) // already email exist 
+        {
+            user.name = name;
+            user.password = hashPassword;
+            user.otp= otp;
+            user.otpExpiry= otpExpiry;  
+            await user.save();          
         }else {
-            createUser = await UserSchema.create({
+            createUser = await UserSchema.create({  // new user
                 name,
                 email,
                 password : hashPassword,
@@ -48,20 +57,28 @@ router.post("/register/user", async(req, res)=>{
             });
         }
 
+        let {emailHtml, emailText} = generateEmailContent(name,otp);
+
+        // console.log("***** ", createUser)
+
         let mailOptions = {
-            from: "ramganta778@gmail.com",
+            from: "noreply.projectcamp@gmail.com",
             to: email,
             subject: "Verify Your Account",
-            html: `
-                <p>Here is your Account Verification Credentials</p>
-                <p>Your OTP for verification is <strong> ${otp} </strong>. It will expire in 2 minutes.</p>
-                <p>Regards,<br>Team Story Book </p>
-            `,
+            html: emailHtml,
+            text : emailText
         };
 
         let emailInfo = await transporter.sendMail(mailOptions);
 
-        res.status(201).json({message :"User Added Successfully",data : createUser || verifyUser, success : true});
+        let data = {
+            name : createUser?.name,
+            email : createUser.email,
+            otp : createUser.otp,
+            otpExpiry : createUser.otpExpiry
+        };
+
+        res.status(201).json({message :"OTP sent to your email",data, success : true});
 
     } catch (error) {
         console.log("some issue in registering user", error);
@@ -77,6 +94,13 @@ router.post("/verify/otp", async(req, res)=>{
         let user = await UserSchema.findOne({email}).select('-password');
         if (!user) {
             return res.status(404).json({ message: "User Not Found", success: false });
+        }
+
+        if(user.otpExpiry >  Date.now()){
+            return res.status(400).json({
+                message : "New OTP already sent. Please wait",
+                success : false
+            });
         }
 
         if (user.isUserVerified) {
@@ -98,7 +122,7 @@ router.post("/verify/otp", async(req, res)=>{
         user.isUserVerified = true;
         await user.save();
 
-        res.cookie("token", token,{sameSite: "strict", httpOnly:true, secure:true});
+        res.cookie("accessToken", token,{sameSite: "strict", httpOnly:true, secure:true});
         res.status(200).json({message : "User Verified Successfully", data : user, success : true})
 
     } catch (error) {
@@ -128,20 +152,19 @@ router.post("/resend/otp",async(req, res)=>{
         user.otpExpiry = otpExpiry;
         await user.save();
 
+        let {html, text} = resentOtpToVerifyAccount(user.name,otp);
+
         let mailOptions = {
-            from: "ramganta778@gmail.com",
+            from: "noreply.projectcamp@gmail.com",
             to: email,
             subject: "New OTP to Verify Your Account",
-            html: `
-                <p>Here is your Account Verification Credentials</p>
-                <p>Your OTP for verification is <strong> ${otp} </strong>. It will expire in 2 minutes.</p>
-                <p>Regards,<br>Team Story Book </p>
-            `,
+            html: html,
+            text : text
         };
 
         let emailInfo = await transporter.sendMail(mailOptions);
 
-        res.status(200).json({message : "Otp Sent Successfully. Check Your Email", success : true});
+        res.status(200).json({message : "OTP Sent Successfully. Check Your Email", success : true});
 
     } catch (error) {
         console.log("some issue in resending otp", error);
@@ -163,10 +186,10 @@ router.post("/user/login", async(req, res)=>{
             return res.status(400).json({message: "Password Required"});           
         }
 
-        let user = await UserSchema.findOne({email});
+        let user = await UserSchema.findOne({email, isUserVerified:true});
 
         if(!user){
-            res.status(400).json({message: "Invalid Credentials", success : false});
+            res.status(400).json({message: "Invalid Credentials", success : false , status:400});
             return;
         }
 
@@ -185,16 +208,15 @@ router.post("/user/login", async(req, res)=>{
 
         await user.save();
 
-        res.cookie("accessToken", 
-            accessToken, {
+        res.cookie("accessToken",accessToken, {
                 sameSite: "strict", 
                 httpOnly:true, 
-                secure:true
+                secure:false
             })
             .cookie("refreshToken", refreshToken, {
                 sameSite: "strict", 
                 httpOnly:true, 
-                secure:true
+                secure:false
             })
             .status(200)
             .json({

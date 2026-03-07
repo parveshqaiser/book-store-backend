@@ -59,7 +59,7 @@ const userModel = new mongoose.Schema({
         type : Number,
     },
     otpExpiry : {
-        type : String,
+        type : Number,
     },
     password : {
         type : String,
