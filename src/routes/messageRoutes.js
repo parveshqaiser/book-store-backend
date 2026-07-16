@@ -33,14 +33,23 @@ router.post("/contact/message", async(req, res)=>{
         }
 
         let insertMessage = await messageSchema.create({
-            name,email,message
+            name,
+            email,
+            message
         });
 
-        return res.status(200).json({ message : "Message Sent Successfully. Admin will respond you after a while.", success : true});
+        return res.status(201).json({ 
+            message : "Message Sent Successfully. Admin will respond you after a while.", 
+            success : true
+        });
 
     } catch (error) {
         console.log("some error in ordering book", error);
-		res.status(500).json({ message: "Server Error", error: error.message, success: false });
+		res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
