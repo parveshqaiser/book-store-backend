@@ -4,6 +4,7 @@ import AdminSchema from "../model/adminSchema.js";
 
 const router = express.Router();
 
+//  FOR ADMIN PURPOSE
 router.post("/admin/login", async(req, res)=>{
 
     try {
@@ -35,28 +36,40 @@ router.post("/admin/login", async(req, res)=>{
 
         let token = jwt.sign({id : admin._id}, "secret-key", {expiresIn:"2h"});
 
-       let data = {
+        let data = {
             username : admin.username,
             role : admin.role,
             token,
-       };
+        };
 
         res.cookie("accessToken", token,{httpOnly:true,sameSite:"strict", maxAge: 60 * 60 * 2000});
         res.status(200).json({message : `Admin Login Success`, success: true, data});
 
     } catch (error) {
-        console.log("some error in logging admin", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
 router.post("/admin/logout", (req, res)=>{
 
     try {
-        res.cookie("accessToken","", {expires : new Date()}).status(200).json({message : "Admin Logout Success", success : true})
+        res.status(200).cookie("accessToken","", 
+            {expires : new Date()}
+        ).json({
+            message : "Admin Logout Success", 
+            success : true
+        });
+
     } catch (error) {
-        console.log("some error in admin logging out", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
