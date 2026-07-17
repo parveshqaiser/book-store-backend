@@ -102,16 +102,13 @@ The application supports:
 - Razorpay Webhooks
 - Secure Payment Verification
 
-
 ## 📌 Future Improvements
 
 - Product Reviews & Ratings
-- Admin Dashboard
+- Admin Dashboard Interface
 - Inventory Management
 - Email Notifications
 - Search Filters
-- Coupon System
-- Order Tracking
 - Docker Support
 - Unit & Integration Testing
 
