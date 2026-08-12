@@ -36,7 +36,7 @@ app.use("/", paymentRoutes);
 app.use("/", messageRoutes);
 
 app.get("/", (req, res)=>{
-    res.status(200).json({message : "Hello from book store"})
+    res.status(200).json({message : "Hello from book store", success : true})
 });
 
 app.get("/test", (req, res)=>{
@@ -51,5 +51,6 @@ dbConnection().then(()=>{
     });
 }).catch((err)=>{
     console.log("Error connecting Database",err );
+    process.exit(1);
 });
 
