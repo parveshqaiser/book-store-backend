@@ -59,8 +59,6 @@ router.post("/register/user", async(req, res)=>{
 
         let {emailHtml, emailText} = generateEmailContent(name,otp);
 
-        // console.log("***** ", createUser)
-
         let mailOptions = {
             from: "noreply.projectcamp@gmail.com",
             to: email,
@@ -81,8 +79,11 @@ router.post("/register/user", async(req, res)=>{
         res.status(201).json({message :"OTP sent to your email",data, success : true});
 
     } catch (error) {
-        console.log("some issue in registering user", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
@@ -126,8 +127,11 @@ router.post("/verify/otp", async(req, res)=>{
         res.status(200).json({message : "User Verified Successfully", data : user, success : true})
 
     } catch (error) {
-        console.log("some issue in verifying otp", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 })
 
@@ -167,8 +171,11 @@ router.post("/resend/otp",async(req, res)=>{
         res.status(200).json({message : "OTP Sent Successfully. Check Your Email", success : true});
 
     } catch (error) {
-        console.log("some issue in resending otp", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
@@ -209,12 +216,12 @@ router.post("/user/login", async(req, res)=>{
         await user.save();
 
         res.cookie("accessToken",accessToken, {
-                sameSite: "strict", 
+                sameSite: "none", 
                 httpOnly:true, 
                 secure:false
             })
             .cookie("refreshToken", refreshToken, {
-                sameSite: "strict", 
+                sameSite: "none", 
                 httpOnly:true, 
                 secure:false
             })
@@ -226,8 +233,11 @@ router.post("/user/login", async(req, res)=>{
             });
 
     } catch (error) {
-        console.log("some error in logging in", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
@@ -250,8 +260,11 @@ router.post("/user/logout",authentication,async(req, res)=>{
         .json({message : "User Logout Success", success : true})
 
     } catch (error) {
-        console.log("some error in logging out", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
@@ -277,8 +290,11 @@ router.post("/verify-refresh-token", authentication,async(req, res)=>{
         .status(200).json({message : "New Access Token Generated", success:true , newAccessToken});
 
     } catch (error) {
-        console.log("some error in logging out", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
@@ -320,8 +336,11 @@ router.post("/forgot/password", async(req, res)=>{
 
 
     } catch (error) {
-        console.log("some error", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({ 
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
@@ -347,8 +366,11 @@ router.post("/verify/password/otp", async(req, res)=>{
         res.status(200).json({message : "OTP Verified ", success : true});
 
     } catch (error) {
-        console.log("some error in logging out", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
@@ -369,8 +391,11 @@ router.post("/confirm/reset/password", async(req, res)=>{
         res.status(200).json({message : "Passowrd Changed Successfilly", success : true});
 
     } catch (error) {
-        console.log("some error", error);
-        res.status(500).json({ message: "Server Error", error: error.message, success: false });
+        res.status(500).json({
+            message: "Server Error", 
+            error: error.message, 
+            success: false 
+        });
     }
 });
 
