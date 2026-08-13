@@ -42,8 +42,24 @@ router.post("/admin/login", async(req, res)=>{
             token,
         };
 
-        res.cookie("accessToken", token,{httpOnly:true,sameSite:"strict", maxAge: 60 * 60 * 2000});
-        res.status(200).json({message : `Admin Login Success`, success: true, data});
+        let isProduction = process.env.NODE_ENV === "production";
+        console.log("isProduction ", isProduction);
+
+        console.log("env value loaded ", process.env.NODE_ENV);
+
+        let cookieOptions = {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            maxAge: 60 * 60 * 2000
+        }
+
+        res.cookie("accessToken", token, cookieOptions)
+        .status(200).json({
+            message : `Admin Login Success`, 
+            success: true, 
+            data
+        });
 
     } catch (error) {
         res.status(500).json({ 
