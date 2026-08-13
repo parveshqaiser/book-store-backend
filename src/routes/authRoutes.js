@@ -210,21 +210,24 @@ router.post("/user/login", async(req, res)=>{
         let accessToken = jwt.sign({id: user._id}, process.env.SECRET_KEY,{expiresIn:"1hr"});
         let refreshToken = jwt.sign({id: user._id}, process.env.SECRET_KEY,{expiresIn:"7days"});
 
+        let isProduction = process.env.NODE_ENV === "production";
+        console.log("isProduction ", isProduction);
+
+        console.log("env value loaded ", process.env.NODE_ENV);
+
+        let cookieOptions = {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+        }
+
         user.accessToken = accessToken;
         user.refreshToken = refreshToken;
 
         await user.save();
 
-        res.cookie("accessToken",accessToken, {
-                sameSite: "none", 
-                httpOnly:true, 
-                secure:false
-            })
-            .cookie("refreshToken", refreshToken, {
-                sameSite: "none", 
-                httpOnly:true, 
-                secure:false
-            })
+        res.cookie("accessToken",accessToken, cookieOptions)
+            .cookie("refreshToken", refreshToken, cookieOptions)
             .status(200)
             .json({
                 message :`Welcome ${user.name}`, 
