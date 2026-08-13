@@ -21,9 +21,16 @@ dotenv.config();
 app.use(express.json());
 app.use(parser());
 
+// app.use(cors({
+//     origin : ["http://localhost:5173","https://book-store-backend-tpz8.onrender.com"],
+//     credentials : true,
+// }));
+
 app.use(cors({
-    origin : "http://localhost:5173",
-    credentials : true,
+    origin: ["http://localhost:5173","http://localhost:5174"],
+    methods : ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
 }));
 
 app.use("/", authRoutes);
