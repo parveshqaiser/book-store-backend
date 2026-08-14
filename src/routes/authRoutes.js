@@ -211,9 +211,6 @@ router.post("/user/login", async(req, res)=>{
         let refreshToken = jwt.sign({id: user._id}, process.env.SECRET_KEY,{expiresIn:"7days"});
 
         let isProduction = process.env.NODE_ENV === "production";
-        console.log("isProduction ", isProduction);
-
-        console.log("env value loaded ", process.env.NODE_ENV);
 
         let cookieOptions = {
             httpOnly: true,

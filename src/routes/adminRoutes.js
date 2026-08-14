@@ -43,10 +43,7 @@ router.post("/admin/login", async(req, res)=>{
         };
 
         let isProduction = process.env.NODE_ENV === "production";
-        console.log("isProduction ", isProduction);
-
-        console.log("env value loaded ", process.env.NODE_ENV);
-
+        
         let cookieOptions = {
             httpOnly: true,
             secure: isProduction,
